@@ -473,11 +473,11 @@ template<class...> struct SomeOf {}; // ???
 // nest--
 
 // nest++
-template<class Id, class>
+template<class Id, class Entity>
 struct EntitySet {};
 // nest--
 // nest++
-template<class Id, class Node, class Leaf>
+template<class Id, class Node>
 struct OrderedTree {};
 // nest--
 ----
@@ -511,11 +511,11 @@ enum class Role { Unknown, Teacher, Student };
 // nest--
 
 // nest++
-using PersonData = AllOf<Name, Role>;
+using PersonEntity = AllOf<Name, Role>;
 // nest--
 
 // nest++
-using Persons = EntitySet<PersonId, PersonData>;
+using PersonSet = EntitySet<PersonId, PersonEntity>;
 // nest--
 ----
 --
@@ -541,17 +541,17 @@ Let's do a sketch, how we intend to use these:
 // nest++
 void testPersonCreate() {
     // nest++
-    auto repo = ToRepository<Persons>{};
+    auto repo = ToRepository<PersonSet>{};
     // nest--
 
     // nest++
-    auto cmd = EntityCreate<PersonData>{ 
+    auto cmd = EntityCreate<PersonEntity>{ 
         Name{"Bjarne Stroustrup"},
         Role::Teacher };
     // nest--
 
     // nest++
-    to_command_processor<Persons>(cmd, repo);
+    to_command_processor<PersonSet>(cmd, repo);
     // nest--
 }
 // nest--
@@ -617,23 +617,23 @@ auto f(AllOf<Ts...>) -> std::tuple<ToStorage<Ts>...>;
 [source%nested, cpp]
 ----
 // nest++
+template<class T>
+using Ptr = T*;
+// nest--
+
 // nest++
 template<class T>
 auto toStorage(T);
 // nest--
 
-// nest++
-template<class T>
-using Ptr = T*;
-// nest--
-
 template<class T>
 using ToStorage = decltype(toStorage(Ptr<T>{}));
-// nest--
 
+// nest++
 template<class... Ts>
 auto toStorage(AllOf<Ts...> *)
     -> std::tuple<ToStorage<Ts>...>;
+// nest--
 
 // nest++
 using Test = ToStorage<AllOf<>>; // error
@@ -646,7 +646,7 @@ using Test = ToStorage<AllOf<>>; // error
 The idea: use function signatures to express type conversions recursively.
 ****
 
-== We have a bit of an ordering problem…
+== The ordering problem…
 
 ""
 …, unqualified name lookup takes place when the template definition is examined.
@@ -660,7 +660,7 @@ Symbols are not looked up on instantiation but on template definition.
 Luckily we have ADL in C++:
 ****
 
-== ADL for the rescue!
+== Read on…
 
 ""
 (in other words, adding a new function declaration after template definition does not make it visible except via ADL)
@@ -673,7 +673,7 @@ As long as arguments are in the same namespace functions are found.
 
 Yeah!
 
-Now fix our simple storage with that…
+How can we apply ADL? …
 ****
 
 [.source.s62x16]
@@ -703,8 +703,9 @@ auto toStorage(ADL, AllOf<Ts...> *)
 // nest--
 
 // nest++
-// …
+using Test = ToStorage<AllOf<>>; // Ok!
 // nest--
+
 } // namespace storage
 // nest--
 ----
@@ -727,24 +728,21 @@ Let's fill in the remaining concepts:
 --
 [source%nested, cpp]
 ----
-template<class... Ts>
-auto toStorage(ADL, AllOf<Ts...> *)
-    -> std::tuple<ToStorage<Ts>...>;
+AllOf<Ts...> 
+        -> std::tuple<ToStorage<Ts>...>
 
 // nest++
-template<class... Ts>
-auto toStorage(ADL, OneOf<Ts...> *)
-// nest++
-    -> std::variant<ToStorage<Ts>...>;
+OneOf<Ts...>
 // nest--
+// nest++
+        -> std::variant<ToStorage<Ts>...>
 // nest--
 
 // nest++
-template<class Id, class Data>
-auto toStorage(ADL, EntitySet<Id, Data> *)
-// nest++
-    -> std::vector<std::tuple<Id, ToStorage<Data>>>;
+EntitySet<Id, Data>
 // nest--
+// nest++
+        -> std::vector<std::tuple<Id, ToStorage<Data>>>
 // nest--
 ----
 --
@@ -776,7 +774,7 @@ Now we also need to handle our value types.
 // storage for values
 // nest++
 template<class T>
-constexpr bool isValue() {
+constexpr bool is_value = []{
 // nest++
     if constexpr (std::is_class_v<T>) 
         return !std::is_empty_v<T>;
@@ -785,14 +783,12 @@ constexpr bool isValue() {
     else
         return std::is_enum_v<T>;
 // nest--
-}
+}();
 // nest--
 
-// nest++
 template<class T>
 auto toStorage(ADL, T *)
-    -> std::enable_if_t<isValue<T>(), T>;
-// nest--
+    -> std::enable_if_t<is_value<T>, T>;
 ----
 --
 
@@ -810,47 +806,6 @@ All value types can basically store themselfs.
 The only concept missing now is our tree:
 ****
 
-[.source.s62x16]
-== !
-
-[.build]
---
-[source%nested, cpp]
-----
-// Storage for OrderedTree
-// nest++
-// nest++
-// nest++
-template<class Id>
-using ParentId = StrongAddTag<Id, struct ParentIdTag>;
-// nest--
-
-template<class Id, class Node>
-using TreeNode = std::tuple<
-// nest++
-    Id, ParentId<Id>,
-// nest--
-// nest++
-    ToStorage<Node>
-// nest--
-    >;
-// nest--
-
-template<class Id, class Node>
-auto toStorage(ADL, OrderedTree<Id, Node> *)
-    -> std::vector<TreeNode<Id, Node>>;
-// nest--
-----
---
-
-[.cue]
-****
-For a tree we have to store the parent relationship.
-
-Apart from that it works like the Entity Set.
-
-Simple?
-****
 
 == Commands
 
@@ -876,30 +831,30 @@ Lets start with the EntitySet:
 [source%nested, cpp]
 ----
 // nest++
-template<class Data>
-using EntityCreate = ToStorage<Data>;
+template<class Entity>
+using EntityCreate = ToStorage<Entity>;
+// nest--
+// nest++
+template<class Id, class Entity>
+using EntityUpdate = std::tuple<Id, ToCommand<Entity>>;
 // nest--
 // nest++
 template<class Id>
 using EntityDestroy = Id;
 // nest--
-// nest++
-template<class Id, class Data>
-using EntityUpdate = std::tuple<Id, ToCommand<Data>>;
-// nest--
 
-template<class Id, class Data>
-auto toCommand(ADL, EntitySet<Id, Data> *)
+template<class Id, class Entity>
+auto toCommand(ADL, EntitySet<Id, Entity> *)
 // nest++
     -> std::variant<
       // nest++
-        EntityCreate<Data>,
+        EntityCreate<Entity>,
+      // nest--
+      // nest++
+        EntityUpdate<Id, Entity>,
       // nest--
       // nest++
         EntityDestroy<Id>>;
-      // nest--
-      // nest++
-        EntityUpdate<Id, Data>,
       // nest--
 // nest--
 ----
@@ -937,10 +892,10 @@ Now we have the commands, now we need repositories.
 --
 [source%nested, cpp]
 ----
-template<class Id, class Data>
-auto toRepository(ADL, EntitySet<Id, Data> *)
+template<class Id, class Entity>
+auto toRepository(ADL, EntitySet<Id, Entity> *)
 // nest++
-    -> std::map<Id, ToRepository<Data>>;
+    -> std::map<Id, ToRepository<Entity>>;
 // nest--
 ----
 --
@@ -959,16 +914,16 @@ But I recommend to build testable classes for this.
 --
 [source%nested, cpp]
 ----
-template<class Id, class Data>
-class EntityRepository {
-    std::map<Id, ToRepository<Data>> m;
+template<class Id, class EntityRepo>
+class EntitySetRepository {
+    std::map<Id, EntityRepo> m;
 
 public:
     // nest++
-    auto operator[] (Id) -> ToRepository<Data>&;
+    auto operator[] (Id) -> EntityRepo&;
     // nest--
     // nest++
-    void create(const ToStorage<Data>&);
+    auto createId() -> Id;
     // nest--
     // nest++
     void destroy(Id);
@@ -976,11 +931,11 @@ public:
 };
 
 // nest++
-template<class Id, class Data>
-auto toRepository(ADL, EntitySet<Id, Data> *)
+template<class Id, class Entity>
+auto toRepository(ADL, EntitySet<Id, Entity> *)
 // nest--
 // nest++
-    -> EntityRepository<Id, Data>;
+    -> EntitySetRepository<Id, ToRepository<Entity>>;
 // nest--
 ----
 --
@@ -1016,7 +971,7 @@ This time we generate functionality instead of types.
 To keep the same pattern, we use lambdas for that:
 ****
 
-[.source.s77x19]
+[.source.s62x16]
 == !
 
 [.build]
@@ -1032,7 +987,8 @@ struct ADL {};
 
 // nest++
 template<class T>
-constexpr auto to_command_processor = toCommandProcessor(ADL, Ptr<T>{});
+constexpr auto to_command_processor = 
+    toCommandProcessor(ADL{}, Ptr<T>{});
 // nest--
 
 } // namespace processor
@@ -1058,31 +1014,30 @@ Let's look at the implementation for EntitySet
 --
 [source%nested, cpp]
 ----
-template<class Id, class Data>
-constexpr auto toCommandProcessor(ADL, EntitySet<Id, Data> *) {
+template<class Id, class Entity>
+constexpr auto toCommandProcessor(ADL, EntitySet<Id, Entity> *) {
     // nest++
-    using T = EntitySet<Id, Data>;
-    return [](const ToCommand<T>& cmd, 
-              ToRepository<T>& repo) {
+    using T = EntitySet<Id, Entity>;
+    return [](const ToCommand<T>& cmd, ToRepository<T>& repo) {
         // nest++
         oneVisit(cmd,
             // nest++
-            [&repo](const ToStorage<Data>& storage) {
-                repo.create(storage);
+            [&](const EntityCreate<Entity>& create) {
+                repo[repo.createId()] = create;
             },
             // nest--
             // nest++
-            [&repo](Id id) {
+            [&](const EntityUpdate<Id, Entity>& update) {
+                auto [id, entityCmd] = update;
+                to_command_processor<Entity>(entityCmd, repo[id]);
+            },
+            // nest--
+            // nest++
+            [&](const EntityDestroy<Id>& id) {
                 repo.destroy(id);
             });
             // nest--
-            // nest++
-            [&repo](const std::tuple<Id, ToCommand<Data>>& update) {
-                auto [id, dataCmd] = update;
-                to_command_processor<Data>(dataCmd, repo[id]);
-            },
-            // nest--
-        // nest--
+       // nest--
     };
     // nest--
 }
@@ -1144,8 +1099,37 @@ Verdigris from Woboq is a huge win.
 // nest++
 // nest++
 template<class... Ts>
-class TupleView : public QObject {
-  W_OBJECT(TupleView)
+class AllOfView : public QObject {
+  // nest++
+  W_OBJECT(AllOfView)
+  // nest--
+
+
+};
+// nest--
+
+// nest++
+W_OBJECT_IMPL((AllOfView<Ts...>), template<class... Ts>)
+// nest--
+
+template<class... Ts>
+auto toViewModel(ADL, AllOf<Ts...> *) -> AllOfView<Ts...>;
+// nest--
+----
+--
+
+
+[.source.s77x19]
+== !
+
+
+[.build]
+--
+[source%nested, cpp]
+----
+template<class... Ts>
+class AllOfView : public QObject {
+  W_OBJECT(AllOfView)
 
   // nest++
   // nest++
@@ -1156,22 +1140,18 @@ class TupleView : public QObject {
       w_cpp::makeProperty<QVariant>(property_name<I>, qvariant_name)
         // nest--
         // nest++
-        .setGetter(&TupleView::getPropertyValue<I>)
-        .setSetter(&TupleView::setPropertyValue<I>)
-        .setNotify(&TupleView::propertyChanged<I>);
+        .setGetter(&AllOfView::getPropertyValue<I>)
+        .setSetter(&AllOfView::setPropertyValue<I>)
+        .setNotify(&AllOfView::propertyChanged<I>);
         // nest--
   };
   // nest--
   W_CPP_PROPERTY(RegisterProperties)
   // nest--
 };
-// nest--
-
-template<class... Ts>
-auto toViewModel(ADL, AllOf<Ts...> *) -> TupleView<Ts...>;
-// nest--
 ----
 --
+
 
 
 
