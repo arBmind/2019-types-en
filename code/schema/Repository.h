@@ -42,50 +42,27 @@ struct Less {
 
 // tag::entityRepository[]
 template<class Id, class EntityRepo>
-class EntityRepository {
+class EntitySetRepository {
     std::map<Id, EntityRepo, Less<Id>> m;
 
 public:
     auto begin() const { return m.begin(); }
     auto end() const { return m.end(); }
 
-    bool contains(Id) const;
+    bool contains(Id id) const { return m.find(id) != m.end(); }
     auto count() const { return m.size(); }
-    auto operator[](Id) -> EntityRepo &;
-    auto operator[](Id) const -> const EntityRepo &;
-    auto createId() -> Id;
-    void destroy(Id);
+    auto operator[](Id id) -> EntityRepo & { return m[id]; }
+    auto operator[](Id id) const -> const EntityRepo & { return m[id]; }
+    auto createId() -> Id {
+        static auto id = 0;
+        return Id{++id};
+    }
+    void destroy(Id id) { m.erase(id); }
 };
 
 template<class Id, class Entity>
 auto toRepository(ADL, EntitySet<Id, Entity> *) //
-    -> EntityRepository<Id, ToRepository<Entity>>;
+    -> EntitySetRepository<Id, ToRepository<Entity>>;
 // end::entityRepository[]
-
-// implementation
-template<class Id, class EntityRepo>
-bool EntityRepository<Id, EntityRepo>::contains(Id id) const {
-    return m.find(id) != m.end();
-}
-
-template<class Id, class EntityRepo>
-auto EntityRepository<Id, EntityRepo>::operator[](Id id) -> EntityRepo & {
-    return m[id];
-}
-template<class Id, class EntityRepo>
-auto EntityRepository<Id, EntityRepo>::operator[](Id id) const -> const EntityRepo & {
-    return m[id];
-}
-
-template<class Id, class EntityRepo>
-auto EntityRepository<Id, EntityRepo>::createId() -> Id {
-    static auto id = 0;
-    return Id{++id};
-}
-
-template<class Id, class EntityRepo>
-auto EntityRepository<Id, EntityRepo>::destroy(Id id) -> void {
-    m.erase(id);
-}
 
 } // namespace repository
