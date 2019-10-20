@@ -11,7 +11,7 @@
 namespace command {
 
 using namespace abstract;
-using storage::isValue;
+using storage::is_value;
 using storage::ToStorage;
 
 struct ADL {};
@@ -23,7 +23,7 @@ template<class... Ts>
 auto toCommand(ADL, AllOf<Ts...> *) -> std::tuple<ToCommand<Ts>...>;
 
 template<class T>
-auto toCommand(ADL, T *) -> std::enable_if_t<isValue<T>(), std::optional<T>>;
+auto toCommand(ADL, T *) -> std::enable_if_t<is_value<T>, std::optional<T>>;
 
 template<class Data>
 using EntityCreate = ToStorage<Data>;

@@ -7,7 +7,7 @@ namespace processor {
 using namespace abstract;
 using command::ToCommand;
 using repository::ToRepository;
-using storage::isValue;
+using storage::is_value;
 using storage::ToStorage;
 
 // tag::boilerplate[]
@@ -26,7 +26,7 @@ constexpr auto toCommandProcessor(ADL, AllOf<Ts...> *) {
     };
 }
 
-template<class T, std::enable_if_t<isValue<T>(), void *> = nullptr>
+template<class T, std::enable_if_t<is_value<T>, void *> = nullptr>
 constexpr auto toCommandProcessor(ADL, T *) {
     return [](const ToCommand<T> &cmd, ToRepository<T> &repo) {
         if (cmd) repo = *cmd;
@@ -54,15 +54,15 @@ constexpr auto toCommandProcessor(ADL, EntitySet<Id, Entity> *) {
                 repo[repo.createId()] = storage;
                 // hint: to allow nesting you will need a storage processor
                 // to_storage_processor<Data>(storage, repo[repo.createId()]);
-        },
+            },
             [&repo](const command::EntityUpdate<Id, Entity> &update) {
-          auto [id, dataCmd] = update;
+                auto [id, dataCmd] = update;
                 to_command_processor<Entity>(dataCmd, repo[id]);
-        },
+            },
             [&repo](const command::EntityDestroy<Id> &destroy) {
                 repo.destroy(destroy); //
             });
-  };
+    };
 }
 // end::entitySet[]
 

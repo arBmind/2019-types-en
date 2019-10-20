@@ -30,15 +30,15 @@ auto toStorage(ADL, EntitySet<Id, Data> *) -> std::vector<std::tuple<Id, ToStora
 // tag::values[]
 // storage for values
 template<class T>
-constexpr bool isValue() {
+constexpr bool is_value = [] {
     if constexpr (std::is_class_v<T>)
         return !std::is_empty_v<T>;
     else
         return std::is_enum_v<T>;
-}
+}();
 
 template<class T>
-auto toStorage(ADL, T *) -> std::enable_if_t<isValue<T>(), T>;
+auto toStorage(ADL, T *) -> std::enable_if_t<is_value<T>, T>;
 // end::values[]
 // end::abstracts[]
 

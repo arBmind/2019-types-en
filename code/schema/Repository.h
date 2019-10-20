@@ -12,7 +12,7 @@
 namespace repository {
 
 using namespace abstract;
-using storage::isValue;
+using storage::is_value;
 using storage::ToStorage;
 
 struct ADL {};
@@ -24,7 +24,7 @@ template<class... Ts>
 auto toRepository(ADL, AllOf<Ts...> *) -> std::tuple<ToRepository<Ts>...>;
 
 template<class T>
-auto toRepository(ADL, T *) -> std::enable_if_t<isValue<T>(), T>;
+auto toRepository(ADL, T *) -> std::enable_if_t<is_value<T>, T>;
 
 namespace simple {
 

@@ -16,7 +16,6 @@
 namespace view_model {
 
 using namespace abstract;
-using storage::isValue;
 
 struct ADL {};
 

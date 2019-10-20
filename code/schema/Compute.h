@@ -4,10 +4,10 @@
 namespace compute {
 
 using namespace abstract;
-using storage::isValue;
+using storage::is_value;
 using storage::ToStorage;
 
-template <class... As, class... Bs>
+template<class... As, class... Bs>
 auto join(AllOf<As...>, AllOf<Bs...>) -> AllOf<As..., Bs...>;
 
 template<class A, class B>
@@ -32,8 +32,7 @@ template<class... Ts>
 auto toComputed(ADL, OneOf<Ts...> *) -> OneOf<ToComputed<Ts>...>;
 
 template<class T>
-auto toComputed(ADL, T *)
-    -> std::enable_if_t<isValue<T>(), T>;
+auto toComputed(ADL, T *) -> std::enable_if_t<is_value<T>, T>;
 
 template<class Id, class Data>
 auto toComputed(ADL, EntitySet<Id, Data> *)
