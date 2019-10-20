@@ -22,10 +22,10 @@ constexpr auto processCommand = to_command_processor<Persons>;
 void testCreate() {
     auto repo = Repository{};
     using CreateCmd = EntityCreate<PersonData>;
-    auto cmd = CreateCmd{Anrede::Herr, Vorname{"Bjarne"}, Nachname{"Stroustrup"}};
+    auto cmd = CreateCmd{Name{"Bjarne Stroustrup"}, Role::Teacher};
     processCommand(cmd, repo);
 
-    std::cout << std::get<Vorname>(repo[PersonId{1}]).v << "\n";
+    std::cout << std::get<Name>(repo[PersonId{1}]).v << "\n";
 }
 
 using compute::ToComputed;
@@ -33,8 +33,8 @@ using OutPersons = ToComputed<Persons>;
 
 void testCompute() {
     using CreateCmd = EntityCreate<PersonData>;
-    auto input = CreateCmd{Anrede::Herr, Vorname{"Bjarne"}, Nachname{"Stroustrup"}};
-    auto output = Ansprache{};
+    auto input = CreateCmd{Name{"Bjarne Stroustrup"}, Role::Teacher};
+    auto output = Introduction{};
     computeComputed(input, output);
 
     std::cout << output.v << "\n";
@@ -45,15 +45,14 @@ void testCompute() {
     constexpr auto processOutCommand = processor::to_command_processor<OutPersons>;
 
     OutCommand outCmd1 = OutCreateCommand{
-        std::get<Anrede>(input),   //
-        std::get<Vorname>(input),  //
-        std::get<Nachname>(input), //
-        output                     //
+        std::get<Name>(input), //
+        std::get<Role>(input), //
+        output                 //
     };
     OutRepository outRepo;
     processOutCommand(outCmd1, outRepo);
 
-    // std::cout << std::get<Ansprache>(outRepo[PersonId{1}]).v << "\n";
+    std::cout << std::get<Introduction>(outRepo[PersonId{1}]).v << "\n";
 }
 
 int main() {

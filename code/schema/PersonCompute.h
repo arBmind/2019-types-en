@@ -9,14 +9,13 @@ namespace person {
 using storage::ToStorage;
 
 // tag::ansprache[]
-inline void computeComputed(const ToStorage<PersonData> &s, Ansprache &o) {
-    auto anrede = std::get<Anrede>(s);
-    auto &nachname = std::get<Nachname>(s);
+inline void computeComputed(const ToStorage<PersonData> &s, Introduction &o) {
+    auto [name, role] = s;
     auto out = std::stringstream{};
-    switch (anrede) {
-    case Anrede::Neutral: out << "Hallo " << nachname.v; break;
-    case Anrede::Herr: out << "Sehr geehrter Herr " << nachname.v; break;
-    case Anrede::Frau: out << "Sehr geehrte Frau " << nachname.v; break;
+    switch (role) {
+    case Role::Unknown: out << name.v << " plays an unknown role."; break;
+    case Role::Teacher: out << name.v << " is a teacher."; break;
+    case Role::Student: out << name.v << " is a student."; break;
     }
     o.v = out.str();
 }

@@ -19,4 +19,7 @@ struct OrderedTree {};
 template<class T>
 auto toComputedValues(T) -> AllOf<>; // Fallback
 
+template<class T>
+using Ptr = T *;
+
 } // namespace abstract

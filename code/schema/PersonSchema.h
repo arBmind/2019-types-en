@@ -11,19 +11,19 @@ using namespace abstract;
 
 // tag::persons[]
 // example usage:
-enum class Anrede { Neutral, Herr, Frau };
-using Vorname = Strong<string, struct VornameTag>;
-using Nachname = Strong<string, struct NachnameTag>;
-using PersonData = AllOf<Anrede, Vorname, Nachname>;
-
 using PersonId = Strong<int, struct PersonIdTag>;
+using Name = Strong<string, struct NameTag>;
+enum class Role { Unknown, Teacher, Student };
+
+using PersonData = AllOf<Name, Role>;
+
 using Persons = EntitySet<PersonId, PersonData>;
 // end::persons[]
 
-// tag::ansprache[]
-using Ansprache = Strong<std::string, struct AnspracheTag>;
+// tag::introduction[]
+using Introduction = Strong<std::string, struct IntroductionTag>;
 
-auto toComputedValues(PersonData) -> AllOf<Ansprache>;
-// end::ansprache[]
+auto toComputedValues(PersonData) -> AllOf<Introduction>;
+// end::introduction[]
 
 } // namespace person

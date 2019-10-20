@@ -10,25 +10,24 @@ using repository::ToRepository;
 using storage::isValue;
 using storage::ToStorage;
 
-// clang-format off
-
 // tag::boilerplate[]
-template<class T> struct ADL {};
+struct ADL {};
+
 template<class T>
-constexpr auto to_command_processor = toCommandProcessor(ADL<T>{});
+constexpr auto to_command_processor = toCommandProcessor(ADL{}, Ptr<T>{});
 // end::boilerplate[]
 
-// clang-format on
-
 template<class... Ts>
-constexpr auto toCommandProcessor(ADL<AllOf<Ts...>>) {
+constexpr auto toCommandProcessor(ADL, AllOf<Ts...> *) {
     return [](const ToCommand<AllOf<Ts...>> &cmd, ToRepository<AllOf<Ts...>> &repo) {
-        return (to_command_processor<Ts>(std::get<ToCommand<Ts>>(cmd), std::get<ToRepository<Ts>>(repo)), ...);
+        return (to_command_processor<Ts>(std::get<ToCommand<Ts>>(cmd),
+                                         std::get<ToRepository<Ts>>(repo)),
+                ...);
     };
 }
 
 template<class T, std::enable_if_t<isValue<T>(), void *> = nullptr>
-constexpr auto toCommandProcessor(ADL<T>) {
+constexpr auto toCommandProcessor(ADL, T *) {
     return [](const ToCommand<T> &cmd, ToRepository<T> &repo) {
         if (cmd) repo = *cmd;
     };
@@ -47,7 +46,7 @@ auto oneVisit(V &&v, Fs &&... fs) {
 // clang-format off
 // tag::entitySet[]
 template<class Id, class Data>
-constexpr auto toCommandProcessor(ADL<EntitySet<Id, Data>>) {
+constexpr auto toCommandProcessor(ADL, EntitySet<Id, Data>*) {
   return [](const ToCommand<EntitySet<Id, Data>> &cmd,
             ToRepository<EntitySet<Id, Data>> &repo) {
     oneVisit(cmd,
@@ -58,7 +57,7 @@ constexpr auto toCommandProcessor(ADL<EntitySet<Id, Data>>) {
           auto [id, dataCmd] = update;
           to_command_processor<Data>(dataCmd, repo[id]);
         },
-        [&repo](Id id) { repo.remove(id); });
+        [&repo](Id id) { repo.destroy(id); });
   };
 }
 // end::entitySet[]

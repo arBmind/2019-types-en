@@ -15,23 +15,22 @@ using namespace abstract;
 using storage::isValue;
 using storage::ToStorage;
 
-// clang-format off
-template<class T> struct ADL {};
+struct ADL {};
+
 template<class T>
-using ToRepository = decltype(toRepository(ADL<T>{}));
-// clang-format on
+using ToRepository = decltype(toRepository(ADL{}, Ptr<T>{}));
 
 template<class... Ts>
-auto toRepository(ADL<AllOf<Ts...>>) -> std::tuple<ToRepository<Ts>...>;
+auto toRepository(ADL, AllOf<Ts...> *) -> std::tuple<ToRepository<Ts>...>;
 
 template<class T>
-auto toRepository(ADL<T>) -> std::enable_if_t<isValue<T>(), T>;
+auto toRepository(ADL, T *) -> std::enable_if_t<isValue<T>(), T>;
 
 namespace simple {
 
 // tag::simpleEntitySet[]
 template<class Id, class Data>
-auto toRepository(ADL<EntitySet<Id, Data>>) -> std::map<Id, ToRepository<Data>>;
+auto toRepository(ADL, EntitySet<Id, Data> *) -> std::map<Id, ToRepository<Data>>;
 // end::simpleEntitySet[]
 
 } // namespace simple
@@ -47,18 +46,28 @@ class EntityRepository {
     std::map<Id, ToRepository<Data>, Less<Id>> m;
 
 public:
+    auto begin() const { return m.begin(); }
+    auto end() const { return m.end(); }
+
+    bool contains(Id) const;
+    auto count() const { return m.size(); }
     auto operator[](Id) -> ToRepository<Data> &;
     auto operator[](Id) const -> const ToRepository<Data> &;
     void create(const ToStorage<Data> &);
-    void remove(Id);
+    void destroy(Id);
 };
 
 template<class Id, class Data>
-auto toRepository(ADL<EntitySet<Id, Data>>) //
+auto toRepository(ADL, EntitySet<Id, Data> *) //
     -> EntityRepository<Id, Data>;
 // end::entityRepository[]
 
 // implementation
+template<class Id, class Data>
+bool EntityRepository<Id, Data>::contains(Id id) const {
+    return m.find(id) != m.end();
+}
+
 template<class Id, class Data>
 auto EntityRepository<Id, Data>::operator[](Id id) -> ToRepository<Data> & {
     return m[id];
@@ -75,7 +84,7 @@ auto EntityRepository<Id, Data>::create(const ToStorage<Data> &data) -> void {
 }
 
 template<class Id, class Data>
-auto EntityRepository<Id, Data>::remove(Id id) -> void {
+auto EntityRepository<Id, Data>::destroy(Id id) -> void {
     m.erase(id);
 }
 
