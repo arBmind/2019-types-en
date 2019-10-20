@@ -19,9 +19,11 @@ pre.source
     box-shadow none
     padding .2em
     background none
-    border 1px dashed #000
-    border-left none
-    border-right none
+    //border 1px dashed #000
+    //border-left none
+    //border-right none
+
+    transition all 0.2s ease-out;
 
     code
         text-shadow none
@@ -35,24 +37,28 @@ pre.source
             display none
     
     pre.source
-        padding 0
-        margin 0
+        padding .1em .2em
+        margin -.1em -.2em
         border none
         overflow hidden
 
         &.bespoke-bullet-current
-            box-shadow: inset 0 0 0 5px green
+            box-shadow inset 0 0 4px 3px green
+
+        &.bespoke-bullet-inactive
+            visibility inherit
+            opacity 0
     .code-toolbar
         > .toolbar
-            display: none
+            display none
 
 section.source
   padding 0
   > pre.source
     padding 0
 
-div > div.code-toolbar > .toolbar
-  top -0.2em
+// div > div.code-toolbar > .toolbar
+//   top -0.2em
 
 div.code-toolbar
     > .toolbar
@@ -61,6 +67,7 @@ div.code-toolbar
         right 0px
         opacity 1
         span
+            display none
             padding 0
             color #555
             font-size 1em
