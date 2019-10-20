@@ -48,6 +48,7 @@ Project {
 
         Export { Depends { name: "cpp17" } }
     }
+
     Application {
         name: "schema_test"
         consoleApplication: true
@@ -55,5 +56,45 @@ Project {
         files: [
             "SchemaTest.cpp",
         ]
+    }
+
+    Product {
+        name: "Verdigris"
+        files: [
+            "wobjectcpp.h",
+            "wobjectdefs.h",
+            "wobjectimpl.h",
+        ]
+    }
+
+    StaticLibrary {
+        name: "view_model"
+
+        files: [
+            "ViewModel.cpp",
+            "ViewModel.h",
+            "names.h",
+        ]
+
+        Depends { name: "schema" }
+        Depends { name: "Qt.qml" }
+
+        Export {
+            Depends { name: "schema" }
+            Depends { name: "Qt.qml" }
+        }
+    }
+    Application {
+        name: "schema_gui"
+        // consoleApplication: true
+
+        files: [
+            "schema_gui.cpp",
+            "schema_gui.qml",
+            "schema_gui.qrc",
+        ]
+
+        Depends { name: "view_model" }
+        Depends { name: "Qt.quick" }
     }
 }
