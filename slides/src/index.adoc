@@ -1,4 +1,4 @@
-= Type driven Development: mit [.yellow]#C++#
+= Type Driven User Interfaces: with [.yellow]#Qt# and [.yellow]#C++#
 :author: Andreas Reischuck
 :twitter: @arBmind
 :!avatar: andreas.png
@@ -9,13 +9,13 @@
 :use-link-attrs:
 :title-separator: :
 :codedir: code
-:!data-uri:
+:data-uri:
 
-*ADC++, Regensburg, Mai 2019*
+*Qt World Summit 2019 Berlin*
 
 ++++
 <svg class="overlay build" viewBox="0 0 1280 720" width="1920" height="1080">
-    <g transform="translate(430,250) scale(3) rotate(10)">
+    <g transform="translate(610,260) scale(3) rotate(10)">
         <text class="cppVersion build" x="0" y="0">17</text>
     </g>
 </svg>
@@ -23,62 +23,63 @@
 
 [.cue]
 ****
-Willkommen
+Welcome
 
-Zielstellung:
+Goals of this talk:
 
-* Wir spielen / hacken?
-* Verstehen - Was ist das?
-* Weniger: Wofür brauch ich das?
+* Go play with C++ / hacken?
+* Increase understanding - What is what?
+* Not Important - Use this next week.
 
-Für jeden hoffentlich etwas dabei
+Hopefully for everybody I have something unknown!
 ****
 
 [.subtitle]
-== Was ist ein Typ?
+== What is a type?
 
 [.cue]
 ****
-Es kommt darauf an, wen man fragt.
+It depends on who you ask?
 ****
 
-== Was ist ein Typ?: …für den Prozessor
+== What is a type?: …for the CPU
 
 [%build]
-* Interpretation von Bits
-* Recheneinheiten
+* Understanding the bits
+* How to compute on bits
 * Alignment
 
 [.cue]
 ****
-* Hardware / Interpretation von Bits
+* Hardware / Interpretation of Bits
 * Float vs Int vs SSE
 ****
 
-== Was ist ein Typ?: …für den Compiler
+== What is a type?: …for a Compiler
 
 [%build]
 * Aggregate
-* Anzahl Bytes
+* Amount of bytes
 * Lifecycle
 
 [.cue]
 ****
-* Klassen, Arrays, … (Speicherlayout)
-* Schutz vor Fehlinterpretation
+* Classes, Arrays, … (Memory layout)
+* Protection against accidental misuse
 ****
 
-== Was ist ein Typ?: …für den Entwickler
+== What is a type?: …for the developer
 
 [%build]
-* Ordnung
-* Semantik
-* Funktionen
+* Architectural entities
+* Semantics
+* Functions
 
 [.cue]
 ****
-* Hilfe zur Strukturierung
-* APIs / Verwaltungs
+* Guidance for structuring code
+* APIs / Management
+* Controller / Repositories
 ****
 
 == !
@@ -88,19 +89,19 @@ image::Zirkelstein.jpg[]
 
 [.cue]
 ****
-* Damit haben wir das geklärt.
-* Jetzt festhalten, es kommt C++ Code
+* Ok, I hope you can follow my story
+* Now, get to C++
 ****
 
 
 [.subtitle]
-== Starke Typen
-
-Strong Types
+== Strong Types
 
 [.cue]
 ****
-* Bevor wir auf typ-getriebene Entwicklung eingehen…
+* Let's implement simple strong types
+
+To motivate this let's look at the issue…
 ****
 
 [.source.s62x16]
@@ -126,10 +127,11 @@ auto v = Velocity{3} + 2; // [.red]##Error##: no operator
 
 [.cue]
 ****
-* Alias bringt keine Sicherheit
-* Die struct *Tag macht den Typen einzigartig.
+* Type alias create no boundaries
 
-Wie könnte das Strong Template aussehen?
+But a tagged template creates a unique type
+
+How might the simplest implementation look like?
 ****
 
 [.source]
@@ -150,12 +152,12 @@ struct Strong {
 
 [.cue]
 ****
-* Die Signatur: Basistyp und beliebig viele Tags
-* Einfachste Implementierung
+* The template signature: base type and any amount of tags
+* Inside we store just the value
 
-Ihr könnt da noch viel hinzufügen… für uns reicht das hier.
+You might want to add operators, but that's enough for this talk.
 
-Mehr…
+If you want to learn more about strong types…
 ****
 
 == !
@@ -166,32 +168,18 @@ link:https://www.youtube.com/watch?v=fWcnp7Bulc8[Strong Types in C++ - Barney De
 
 [.cue]
 ****
-Es gibt viele gute Vorträge darüber.
+There are a lot of good talks and blog posts.
 
-Ein gutes Beispiel ist auch <chronos>.
+If you want to stick to standard take a look at <chronos>.
 
-Ziel ist es angenehme "Reguläre Typen" zu bauen.
-****
-
-== !
-
-image::VictorCiura_RegularTypes_Accu2019.png[role="center", width="1280"]
-
-link:https://www.youtube.com/watch?v=OMhzlcBl9Hc[Regular Types and Why Do I Care ? - Victor Ciura [ACCU 2019]]
-
-[.cue]
-****
-Dazu gibt es ebenfalls gutes Material.
-
-Für uns reicht erstmal der einfache Strong Type.
 ****
 
 
-== Anwendungsfall
+== Type Driven Applications
 
 [%build]
-* verteiltes System
-* (vereinfacht)
+* imagine a distributed system
+* (note: still slide example)
 
 == !
 
@@ -266,7 +254,7 @@ Für uns reicht erstmal der einfache Strong Type.
                     a6,6 0,0,1 6,6 v40
                     a6,6 0,0,1 -6,6 h-160
                     a6,6 0,0,1 -6,-6 z" />
-            <text class="ActionText" x="0" y="0">Aktion</text>
+            <text class="ActionText" x="0" y="0">Action</text>
             <path class="MouseCursor"
                 fill="#fff" stroke="#222"
                 d="M0,0 l10,17 l-7,-2 l3,10 h-12 l3,-10 l-7,2 z"
@@ -288,7 +276,7 @@ Für uns reicht erstmal der einfache Strong Type.
                 c-53,-7 -120,20 -150,40
                 c-1.66,1 -4,.33 -5,-1.33 z"
             transform="rotate(8)" />
-        <text class="commandText" x="0" y="0">Kommando</text>
+        <text class="commandText" x="0" y="0">Command</text>
     </g>
 
     <g class="server build" transform="translate(1050,150)">
@@ -351,7 +339,7 @@ Für uns reicht erstmal der einfache Strong Type.
                 v-15 l40,-40 l-40,-40 z"
             transform="scale(0.66) translate(0,30)" />
         
-        <text class="ViewText" x="0" y="-50">Berechnungen</text>
+        <text class="ViewText" x="0" y="-50">Computations</text>
     </g>
 
     <g class="updates build" transform="translate(530, 500)">
@@ -409,7 +397,7 @@ Für uns reicht erstmal der einfache Strong Type.
                m25,0 v-60 h20 v60 z"
             transform="translate(50,0)" />
         
-        <text class="ViewText" x="0" y="-90">Ansichten</text>
+        <text class="ViewText" x="0" y="-90">Views</text>
     </g>
 
 </svg> 
@@ -417,26 +405,29 @@ Für uns reicht erstmal der einfache Strong Type.
 
 
 [.subtitle]
-== Datenschema
+== Data Schema
 
 [.cue]
 ****
-Hmm, das gibts doch schon?
+Where did I hear that before?
 ****
 
-== Beispiele
+== Examples
 
 [%build]
-* XML / JSON-Schema
-* Tabellenschema (Datenbanken)
-* Objektbeziehungsmodell (ERM)
+* XML schema
+* JSON schema
+* data definition language (DDL)
 
 [.cue]
 ****
-Das Problem ist analog?
+Schemas are everywhere.
 
-* Schema treibt Protokoll / Speicherformat
-* Austausch zwischen Softwarekomponenten
+They describe how our data is organised
+These are essential part of a distributed system.
+
+* We can derive how to store our data
+* And we can derive how to communicate
 ****
 
 == !
@@ -445,25 +436,22 @@ image::Geburtstag.jpg[role="center", width="1920"]
 
 [.cue]
 ****
-Wir haben alle Begriffe
+We have now everything to try this with C++ and Qt
 
 * Strong Types
-* Protokolle, Services und Repositories
-* Datenschema
-
-Bevor wir losessen, brauchen wir noch Motivation.
-Nicht wirklich ein Anwendungsbeispiel, sondern eine ganze Klasse:
+* Distributed System: Commands, Events, Protocols,
+* data schema
 ****
 
 
 [.subtitle]
-== Schema mit C++
+== Schema with C++ types
 
 [.cue]
 ****
-kommen wir zurück zu richtigem Code.
+Let's start with the basics.
 
-Wie beschreiben wir ein Datenschema mit C++?
+How can we express our data schema in C++.
 ****
 
 [.source]
@@ -481,16 +469,12 @@ template<class...> struct AllOf {}; // struct
 template<class...> struct OneOf {}; // variant
 // nest--
 // nest++
-template<class...> struct SomeOf {};
+template<class...> struct SomeOf {}; // ???
 // nest--
+
 // nest++
-template<class Id, class> struct EntitySet {};
-// nest--
-// nest++
-template<class Id, class> struct IdMap {};
-// nest--
-// nest++
-// …
+template<class Id, class>
+struct EntitySet {};
 // nest--
 // nest++
 template<class Id, class Node, class Leaf>
@@ -501,11 +485,11 @@ struct OrderedTree {};
 
 [.cue]
 ****
-Wir bauen uns abstrakte Dummy-Typen.
+Notice these are all empty structures.
 
-Ein Baum ist jetzt genau das, was wir in unserer Anwendung darunter verstehen.
+Our tree is customized to our special needs.
 
-Ok, jetzt können wir die benutzen.
+Ok, simple enough let's use these types for an example:
 ****
 
 [.source.s62x16]
@@ -517,19 +501,17 @@ Ok, jetzt können wir die benutzen.
 ----
 // example usage:
 // nest++
-enum class Anrede { Neutral, Herr, Frau };
-// nest--
-// nest++
 using PersonId = Strong<int, struct PersonIdTag>;
 // nest--
 // nest++
-using Vorname = Strong<string, struct VornameTag>;
+using Name = Strong<string, struct VornameTag>;
 // nest--
 // nest++
-using Nachname = Strong<string, struct NachnameTag>;
+enum class Role { Unknown, Teacher, Student };
 // nest--
+
 // nest++
-using PersonData = AllOf<Anrede, Vorname, Nachname>;
+using PersonData = AllOf<Name, Role>;
 // nest--
 
 // nest++
@@ -540,10 +522,13 @@ using Persons = EntitySet<PersonId, PersonData>;
 
 [.cue]
 ****
-Wir wollen Personendaten verwalten.
+Let's store some basic person data
 
-Statt Datenfeldern haben wir Typen.
-Statt fixer Container haben wir abstrakte Konzepte.
+We use concrete and unique value types to store properties.
+
+Instead of structures and containers we use our schema primitives.
+
+Let's do a sketch, how we intend to use these:
 ****
 
 [.source.s62x16]
@@ -554,70 +539,75 @@ Statt fixer Container haben wir abstrakte Konzepte.
 [source%nested, cpp]
 ----
 // nest++
-using Command = ToCommand<Persons>;
-// nest--
-// nest++
-using Repository = ToRepository<Persons>;
-// nest--
-// nest++
-constexpr auto processCommand = 
-    to_command_processor<Persons>;
-// nest--
+void testPersonCreate() {
+    // nest++
+    auto repo = ToRepository<Persons>{};
+    // nest--
 
-// nest++
-void testCreate() {
     // nest++
-    auto repo = Repository{};
+    auto cmd = EntityCreate<PersonData>{ 
+        Name{"Bjarne Stroustrup"},
+        Role::Teacher };
     // nest--
+
     // nest++
-    using CreateCmd = EntityCreate<PersonData>;
-    // nest--
-    // nest++
-    auto cmd = CreateCmd{ Anrede::Herr, 
-        Vorname{"Bjarne"}, Nachname{"Stroustrup"} };
-    // nest--
-    // nest++
-    processCommand(cmd, repo);
+    to_command_processor<Persons>(cmd, repo);
     // nest--
 }
 // nest--
 ----
 --
 
-== Typ getriebene [.green]#Code Generierung#
+== Type driven [.green]#Code# generation
 
 [.canvas]
 image::grandValleyCattleDrive.jpg[]
 
-== Ziele
+== Our TODO List
 
 [%build]
-* [language-cpp]#`ToCommand<T>`# - Befehle
-* [language-cpp]#`ToRepository<T>`# - Repository
-* [language-cpp]#`to_command_processor<T>`# - Verarbeitung
-* Netzwerk-Protokolle, Gui, …
+* [language-cpp]#`ToCommand<T>`#
+* [language-cpp]#`ToRepository<T>`#
+* [language-cpp]#`to_command_processor<T>`#
+* Network-Protocols, GUI, …
 
 [.cue]
 ****
-* Einfache Speicherung für den Transport im Speicher.
-* Befehle zum Verwalten der Daten
-* Repositories zum längerfristigen Speichern und Nachschlagen
-* Protokolle zum Ableich zwischen Rechnern
-* komplexe Verarbeitung der Daten
+* commands to manage our storage
+* repositories to store and retrieve the data
+* apply commands to repositories
+* continue to profit with networking, GUIs and much more…
+
+Ok, let's get to work:
+* First try to do some simple transport storage of data for our create command.
 ****
 
 
-== Einfache Speicherung
+== Simple storage
 
 [.build]
 * [language-cpp]#`ToStorage<T>`#
 
 [.cue]
 ****
-Die Daten müssen nur abgespeichert werden, damit sie nicht verloren gehen.
-
-Wir müssen kein Protokoll einhalten - alles steht uns zur Verfügung.
+The data has to be simply be stored to not get lost.
 ****
+
+[.source.s62x16]
+== !
+
+[source, cpp]
+----
+AllOf<Ts...> -> std::tuple<ToStorage<Ts>...>
+----
+
+[.source.s62x16]
+== !
+
+[source, cpp]
+----
+auto f(AllOf<Ts...>) -> std::tuple<ToStorage<Ts>...>;
+----
 
 [.source.s62x16]
 == !
@@ -632,15 +622,18 @@ template<class T>
 auto toStorage(T);
 // nest--
 
+// nest++
 template<class T>
-using ToStorage = decltype(toStorage(T));
+using Ptr = T*;
 // nest--
 
-// nest++
-template<class... Ts>
-auto toStorage(AllOf<Ts...>)
-    -> std::tuple<ToStorage<Ts>...>;
+template<class T>
+using ToStorage = decltype(toStorage(Ptr<T>{}));
 // nest--
+
+template<class... Ts>
+auto toStorage(AllOf<Ts...> *)
+    -> std::tuple<ToStorage<Ts>...>;
 
 // nest++
 using Test = ToStorage<AllOf<>>; // error
@@ -648,8 +641,12 @@ using Test = ToStorage<AllOf<>>; // error
 ----
 --
 
+[.cue]
+****
+The idea: use function signatures to express type conversions recursively.
+****
 
-== Reihenfolge-Problem
+== We have a bit of an ordering problem…
 
 ""
 …, unqualified name lookup takes place when the template definition is examined.
@@ -658,15 +655,12 @@ link:https://en.cppreference.com/w/cpp/language/unqualified_lookup#Template_defi
 
 [.cue]
 ****
-Anders als man es intuitiv vermuten würde.
-Werden nicht beim Instantiierten des Templates die Symbole gesucht.
+Symbols are not looked up on instantiation but on template definition.
 
-Sondern: Dort wo wir das Template definieren, werden die Namen evaluiert.
-
-Zum Glück gibt es ADL…
+Luckily we have ADL in C++:
 ****
 
-== ADL rettet uns!
+== ADL for the rescue!
 
 ""
 (in other words, adding a new function declaration after template definition does not make it visible except via ADL)
@@ -675,11 +669,11 @@ link:https://en.cppreference.com/w/cpp/language/unqualified_lookup#Template_defi
 
 [.cue]
 ****
-So lange unsere Argumente in einem Namensraum sind, finden wir Funktionen auch in diesen Namensräumen.
+As long as arguments are in the same namespace functions are found.
 
-Puhh!
+Yeah!
 
-Schauen wir uns das mal für die einfache Speicherung an…
+Now fix our simple storage with that…
 ****
 
 [.source.s62x16]
@@ -694,17 +688,17 @@ Schauen wir uns das mal für die einfache Speicherung an…
 namespace storage {
 
 // nest++
-template<class T> struct ADL {};
+struct ADL {};
 // nest--
 
 // nest++
 template<class T>
-using ToStorage = decltype(toStorage(ADL<T>{}));
+using ToStorage = decltype(toStorage(ADL{}, Ptr<T>{}));
 // nest--
 
 // nest++
 template<class... Ts>
-auto toStorage(ADL<AllOf<Ts...>>)
+auto toStorage(ADL, AllOf<Ts...> *)
     -> std::tuple<ToStorage<Ts>...>;
 // nest--
 
@@ -718,12 +712,12 @@ auto toStorage(ADL<AllOf<Ts...>>)
 
 [.cue]
 ****
-Außen ein Namespace.
+We add a namespace around everything.
 
-* ADL Wrapper sorgt dafür dass alles in unserem Namespace ist.
-* ToStorage kann sogar unbekannte Funktion mit ADL benutzen.
+* The ADL wrapper ensures everything in that namespace is found.
+* ToStorage now can use an unknown function.
 
-Jetzt brauchen wir nur die Funktion weiter zu spezialisieren.
+Let's fill in the remaining concepts:
 ****
 
 [.source.s62x16]
@@ -734,12 +728,12 @@ Jetzt brauchen wir nur die Funktion weiter zu spezialisieren.
 [source%nested, cpp]
 ----
 template<class... Ts>
-auto toStorage(ADL<AllOf<Ts...>>)
+auto toStorage(ADL, AllOf<Ts...> *)
     -> std::tuple<ToStorage<Ts>...>;
 
 // nest++
 template<class... Ts>
-auto toStorage(ADL<OneOf<Ts...>>)
+auto toStorage(ADL, OneOf<Ts...> *)
 // nest++
     -> std::variant<ToStorage<Ts>...>;
 // nest--
@@ -747,7 +741,7 @@ auto toStorage(ADL<OneOf<Ts...>>)
 
 // nest++
 template<class Id, class Data>
-auto toStorage(ADL<EntitySet<Id, Data>>)
+auto toStorage(ADL, EntitySet<Id, Data> *)
 // nest++
     -> std::vector<std::tuple<Id, ToStorage<Data>>>;
 // nest--
@@ -757,29 +751,20 @@ auto toStorage(ADL<EntitySet<Id, Data>>)
 
 [.cue]
 ****
-AllOf sagt alle Typen sollen genau einmal gespeichert sein.
-Das macht ein std::tuple ganz gut.
-Für jeden Typen bilden wir auch wieder den Storage Typen.
+AllOf means all the given types are stored
+std::tuple seems perfect for this job.
+For every type we derive the storage type recursively.
 
-OneOf sagt es ist genau ein Typ vorhanden.
-Das bildet ein std::variant sehr gut ab.
+OneOf wants us to store exactly one of the types
+std::variant seems to be made for this
 
-EntitySet ist etwas spezieller.
-Für jedes Entity speichern wir die Id und die Daten.
-Da es beliebig viele geben kann und wir nur speichern wollen, passt ein Vector sehr gut.
+EntitySet stores any amount of entities indexed by id.
+A vector storing a tuple does this job quite well.
 
-Alles klar?
+So you see the pattern for schema concepts?
 
-Wir rufen ToStorage auch für unsere Primitiven auf.
-Dafür brauchen wir auch noch eine Spezialisierung.
+Now we also need to handle our value types.
 ****
-
-== Pattern
-
-[%build]
-* Je abstraktem Typ
-* Eine Spezialisierung
-* Rekursion für Untertypen
 
 [.source.s62x16]
 == !
@@ -805,7 +790,7 @@ constexpr bool isValue() {
 
 // nest++
 template<class T>
-auto toStorage(ADL<T>)
+auto toStorage(ADL, T *)
     -> std::enable_if_t<isValue<T>(), T>;
 // nest--
 ----
@@ -813,17 +798,16 @@ auto toStorage(ADL<T>)
 
 [.cue]
 ****
-Zunächst müssen wir die Values von Abstrakten Typen trennen.
-Wenn es eine Klasse oder Struct ist, darf es nicht leer sein.
-Ansonsten haben wir nur "rohe" enums erlaubt.
-Alles andere sollte in Strong-Typen verpackt sein.
+First we have to distinguish our value types from the schema types.
 
-ToStorage ist der Typ selbst, für alle Value Typen.
-Mit C++ brauchen wir etwas SFINAE.
+A class or struct is used for strong types. 
+But those are unlike our schema primitives not empty.
+We also use enums direcly as property types.
+Everything else is not consided value type here.
 
-Ok. Prinzip klar?
+All value types can basically store themselfs.
 
-Dann schauen wir mal, was beim Baum passiert.
+The only concept missing now is our tree:
 ****
 
 [.source.s62x16]
@@ -853,7 +837,7 @@ using TreeNode = std::tuple<
 // nest--
 
 template<class Id, class Node, class Leaf>
-auto toStorage(ADL<OrderedTree<Id, Node, Leaf>>)
+auto toStorage(ADL, OrderedTree<Id, Node, Leaf> *)
     -> std::vector<TreeNode<Id, Node, Leaf>>;
 // nest--
 ----
@@ -861,16 +845,14 @@ auto toStorage(ADL<OrderedTree<Id, Node, Leaf>>)
 
 [.cue]
 ****
-Beim Baum haben wir wieder Id und Daten.
-Wir müssen nun aber auch die Hierarchie abbilden.
-Für die Speicherung ist es am einfachsten, wenn jeder Knoten, seinen Parent kennt.
+For a tree we have to store the parent relationship.
 
-Zunächst sollten wir ParentId und Id unterscheiden.
+Apart from that it works like the Entity Set.
 
-Einfach oder?
+Simple?
 ****
 
-== Befehle
+== Commands
 
 [.build]
 * [.green]#✔# [language-cpp]#`ToStorage<T>`#
@@ -878,11 +860,12 @@ Einfach oder?
 
 [.cue]
 ****
-Nachdem das für Storage so gut funktioniert, machen wir das für Befehle auch.
+Commands are applied to Repositories to change the current state.
 
-Basierend auf dem Schema bauen wir Datenstrukturen für alle Befehle auf.
+We apply the same pattern as for storage.
+The ADL boilerplate is left out of the slides.
 
-Den ADL Boilerplate erspare ich euch, der ist immer gleich.
+Lets start with the EntitySet:
 ****
 
 [.source.s62x16]
@@ -897,26 +880,26 @@ template<class Data>
 using EntityCreate = ToStorage<Data>;
 // nest--
 // nest++
+template<class Id>
+using EntityDestroy = Id;
+// nest--
+// nest++
 template<class Id, class Data>
 using EntityUpdate = std::tuple<Id, ToCommand<Data>>;
 // nest--
-// nest++
-template<class Id>
-using EntityDelete = Id;
-// nest--
 
 template<class Id, class Data>
-auto toCommand(ADL<EntitySet<Id, Data>>)
+auto toCommand(ADL, EntitySet<Id, Data> *)
 // nest++
     -> std::variant<
       // nest++
         EntityCreate<Data>,
       // nest--
       // nest++
-        EntityUpdate<Id, Data>,
+        EntityDestroy<Id>>;
       // nest--
       // nest++
-        EntityDelete<Id>>;
+        EntityUpdate<Id, Data>,
       // nest--
 // nest--
 ----
@@ -924,13 +907,15 @@ auto toCommand(ADL<EntitySet<Id, Data>>)
 
 [.cue]
 ****
-Fangen wir gleich mit dem EnititySet an.
+What kind of commands to we need?
 
-Was hätten wir da für Befehle?
+* Create uses our storage
+* Destroy just refers to the item to destroy
+* Update identifies one Entity and stores a command on them.
 
-Create, Update und Delete.
+Only Update is recursive!
 
-Nur Update ist Rekursiv!
+Simple enough - next up: Tree commands
 ****
 
 [.source.s90x23]
@@ -949,6 +934,10 @@ using TreeCreate = std::tuple<
     ParentId<Id>, BeforeId<Id>, ToStorage<OrderedTree<Id, Node, Leaf>>>;
 // nest--
 // nest++
+template<class Id>
+using TreeDestroy = Id;
+// nest--
+// nest++
 template<class Id, class Node, class Leaf>
 using TreeUpdate = std::tuple<
 // nest--
@@ -959,14 +948,10 @@ using TreeUpdate = std::tuple<
 template<class Id>
 using TreeMove = std::tuple<Id, ParentId<Id>, BeforeId<Id>>;
 // nest--
-// nest++
-template<class Id>
-using TreeDelete = Id;
-// nest--
 
 // nest++
 template<class Id, class Node, class Leaf>
-auto toCommand(ADL<OrderedTree<Id, Node, Leaf>>)
+auto toCommand(ADL, OrderedTree<Id, Node, Leaf> *)
 // nest++
     -> std::variant<
       // nest++
@@ -976,7 +961,7 @@ auto toCommand(ADL<OrderedTree<Id, Node, Leaf>>)
         TreeUpdate<Id, Node, Leaf>,
       // nest--
       // nest++
-        TreeMove<Id>, TreeDelete<Id>>;
+        TreeMove<Id>, TreeDestroy<Id>>;
       // nest--
 // nest--
 // nest--
@@ -985,14 +970,12 @@ auto toCommand(ADL<OrderedTree<Id, Node, Leaf>>)
 
 [.cue]
 ****
-Beim Baum ist wieder alles analog… nur etwas aufwendiger.
-Daher hab ich die Befehle mal als Typen rausgezogen.
+Just a notch more complex.
 
-Update verarbeitet nur einen Knoten, damit es einfacher wird.
-
-Zusätzlich können wir noch Knoten verschieben.
-
-Wie Ihr seht kann man immer lokal arbeiten.
+* Create we have to know where in the tree we add a subtree.
+* Destroy just identifies the tree node to destroy.
+* Update identifies a node and what command to apply there.
+* TreeMove allows to move nodes inside the tree.
 ****
 
 == Repository
@@ -1004,7 +987,7 @@ Wie Ihr seht kann man immer lokal arbeiten.
 
 [.cue]
 ****
-Den gleichen Pattern können wir nun auch nutzen um Repositories aus dem Schema abzuleiten.
+Now we have the commands, now we need repositories.
 ****
 
 [.source.s62x16]
@@ -1015,7 +998,7 @@ Den gleichen Pattern können wir nun auch nutzen um Repositories aus dem Schema 
 [source%nested, cpp]
 ----
 template<class Id, class Data>
-auto toRepository(ADL<EntitySet<Id, Data>>)
+auto toRepository(ADL, EntitySet<Id, Data> *)
 // nest++
     -> std::map<Id, ToRepository<Data>>;
 // nest--
@@ -1024,9 +1007,9 @@ auto toRepository(ADL<EntitySet<Id, Data>>)
 
 [.cue]
 ****
-Das reicht aus.
+This is enough.
 
-Zum besseren Testen kann es hilfreich sein, eigene Klassen zu erstellen…
+But I recommend to build testable classes for this.
 ****
 
 [.source.s62x16]
@@ -1048,13 +1031,13 @@ public:
     void create(const ToStorage<Data>&);
     // nest--
     // nest++
-    void remove(Id);
+    void destroy(Id);
     // nest--
 };
 
 // nest++
 template<class Id, class Data>
-auto toRepository(ADL<EntitySet<Id, Data>>)
+auto toRepository(ADL, EntitySet<Id, Data> *)
 // nest--
 // nest++
     -> EntityRepository<Id, Data>;
@@ -1064,10 +1047,10 @@ auto toRepository(ADL<EntitySet<Id, Data>>)
 
 [.cue]
 ****
-So, sehen wir direkt welche Operationen angedacht sind.
+You see the commands that are available as member functions.
 ****
 
-== Befehlsverarbeitung
+== Processing Commands
 
 [.build]
 * [.green]#✔# [language-cpp]#`ToStorage<T>`#
@@ -1077,7 +1060,7 @@ So, sehen wir direkt welche Operationen angedacht sind.
 
 [.cue]
 ****
-Nach Commands und Repositories geht es nun daran die Befehle auch wirklich zu verarbeiten.
+Now we are ready to apply commands to repositories.
 ****
 
 == !
@@ -1086,11 +1069,11 @@ Command ∘ Repository -> Updated Repository
 
 [.cue]
 ****
-Die Repositories implementieren alles grundlegende,
-aber die Steuerung fehlt noch.
+The repositories already implement all the functionality.
+We just have to connect it to the schema.
 
-Wir generieren hier keine Typen sondern Funktionen.
-Damit wir den Pattern nicht zu start abwandeln müssen, nutzen wir Lambdas…
+This time we generate functionality instead of types.
+To keep the same pattern, we use lambdas for that:
 ****
 
 [.source.s77x19]
@@ -1100,20 +1083,16 @@ Damit wir den Pattern nicht zu start abwandeln müssen, nutzen wir Lambdas…
 --
 [source%nested, cpp]
 ----
-// Processor Boilerplate
+// Processor boilerplate
 namespace processor {
 
 // nest++
-template<class T> struct ADL {};
-// nest--
-
-// nest++
-template<class T> auto toCommandProcessor(T); // Lambda(cmd, repo&)
+struct ADL {};
 // nest--
 
 // nest++
 template<class T>
-constexpr auto to_command_processor = toCommandProcessor(ADL<T>{});
+constexpr auto to_command_processor = toCommandProcessor(ADL, Ptr<T>{});
 // nest--
 
 } // namespace processor
@@ -1122,14 +1101,14 @@ constexpr auto to_command_processor = toCommandProcessor(ADL<T>{});
 
 [.cue]
 ****
-Wir haben weiterhin das Wrapper für ADL.
+We still use an ADL wrapper.
 
-toCommandProcessor liefert ein Lambda.
-Das Lambda erwartet ein Command und eine Referenz auf das passende Repository.
+toCommandProcessor returns a lambda.
+The lambda expects a command and a mutable repository reference
 
-Da wir Lambdas aus dem Typ nicht instantiieren können, nutzen wir eine Compile-Time-Konstante.
+Until C++20 Lambdas cannot be instantiated, so we use a constexpr constant.
 
-Für ein EntitySet sieht dass dann wie folgt aus…
+Let's look at the implementation for EntitySet
 ****
 
 [.source.s77x19]
@@ -1140,10 +1119,11 @@ Für ein EntitySet sieht dass dann wie folgt aus…
 [source%nested, cpp]
 ----
 template<class Id, class Data>
-constexpr auto toCommandProcessor(ADL<EntitySet<Id, Data>>) {
+constexpr auto toCommandProcessor(ADL, EntitySet<Id, Data> *) {
     // nest++
-    return [](const ToCommand<EntitySet<Id, Data>>& cmd, 
-              ToRepository<EntitySet<Id, Data>>& repo) {
+    using T = EntitySet<Id, Data>;
+    return [](const ToCommand<T>& cmd, 
+              ToRepository<T>& repo) {
         // nest++
         oneVisit(cmd,
             // nest++
@@ -1152,15 +1132,15 @@ constexpr auto toCommandProcessor(ADL<EntitySet<Id, Data>>) {
             },
             // nest--
             // nest++
+            [&repo](Id id) {
+                repo.destroy(id);
+            });
+            // nest--
+            // nest++
             [&repo](const std::tuple<Id, ToCommand<Data>>& update) {
                 auto [id, dataCmd] = update;
                 to_command_processor<Data>(dataCmd, repo[id]);
             },
-            // nest--
-            // nest++
-            [&repo](Id id) {
-                repo.remove(id);
-            });
             // nest--
         // nest--
     };
@@ -1171,12 +1151,11 @@ constexpr auto toCommandProcessor(ADL<EntitySet<Id, Data>>) {
 
 [.cue]
 ****
-Wir erzeugen, das besagte Lambda mit der Signatur.
-Abhängig vom konkreten Befehl…
-rufen wir die passende Funktion im Repository auf.
+We create a lambda with the expected signature.
+Depending on the actual command we call the repository function.
 ****
 
-== Zwischenstand
+== Current Scores
 
 [%build]
 * [.green]#✔# [language-cpp]#`ToStorage<T>`#
@@ -1184,192 +1163,109 @@ rufen wir die passende Funktion im Repository auf.
 * [.green]#✔# [language-cpp]#`ToRepository<T>`#
 * [.green]#✔# [language-cpp]#`to_command_processor<T>`#
 
-== Was noch?
+== What now?
 
 [%build]
-* Netzwerk-Protokolle
-* Berechnungen
-* Gui
-
+* Network-Protocols
+* Computations
+* GUI
 
 [.cue]
 ****
-Protokolle - da kommt nichts neues
+Protocols - work just as seen before.
+Computations - basically compute new values from existing data.
+
+Let's look deeper into GUIs with Qt.
 ****
 
-== Berechnungen
-
-[.source.s90x23]
-== !
-
-[.build]
---
-[source%nested, cpp]
-----
-// nest++
-using Ansprache = Strong<std::string, struct AnspracheTag>;
-// nest--
-
-// nest++
-auto toComputedValues(PersonData) -> AllOf<Ansprache>;
-// nest--
-
-// nest++
-void compute(const ToStorage<PersonData>& s, Ansprache& o) {
-    auto anrede = std::get<Anrede>(s);
-    auto& nachname = std::get<Nachname>(s);
-    // nest++
-    auto out = std::stringstream{};
-    switch (anrede) {
-    case Anrede::Neutral: out << "Hallo " << nachname.v; break;
-    case Anrede::Herr: out << "Sehr geehrter Herr " << nachname.v; break;
-    case Anrede::Frau: out << "Sehr geehrte Frau " << nachname.v; break;
-    }
-    o.v = out.str();
-    // nest--
-}
-// nest--
-----
---
-
-[.source.s62x16]
-== !
-
-[.build]
---
-[source%nested, cpp]
-----
-void testCompute() {
-    // nest++
-    auto input = EntityCreate<PersonData>{Anrede::Herr, 
-        Vorname{"Bjarne"}, Nachname{"Stroustrup"}};
-    // nest--
-    // nest++
-    auto output = Ansprache{};
-    // nest--
-    // nest++
-    compute::compute(input, output);
-    // nest--
-}
-----
---
-
-[.source.s90x23]
-== !
-
-[.build]
---
-[source%nested, cpp]
-----
-void testCompute() {
-    auto input = EntityCreate<PersonData>{Anrede::Herr, 
-        Vorname{"Bjarne"}, Nachname{"Stroustrup"}};
-    auto output = Ansprache{};
-    compute::compute(input, output);
-
-    // nest++
-    using OutPersons = ToComputed<Persons>;
-    // nest--
-    // nest++
-    using OutCommand = ToCommand<OutPersons>;
-    // nest--
-    // nest++
-    using OutCreateCommand = EntityCreate<ToComputed<PersonData>>;
-    // nest--
-    // nest++
-    using OutRepository = ToRepository<OutPersons>;
-    // nest--
-    // nest++
-    constexpr auto processOutCommand = 
-        processor::to_command_processor<OutPersons>;
-    // nest--
-
-    // nest++
-    OutCommand outCmd1 = OutCreateCommand{
-        std::get<Anrede>(input),
-        std::get<Vorname>(input), std::get<Nachname>(input),
-        output
-    };
-    // nest--
-    // nest++
-    OutRepository outRepo;
-    // nest--
-    // nest++
-    processOutCommand(outCmd1, outRepo);
-    // nest--
-}
-----
---
-
-[.source.s90x23]
-== !
-
-[.build]
---
-[source%nested, cpp]
-----
-// nest++
-template<class T>
-auto toComputedValues(T) -> AllOf<>; // Fallback
-// nest--
-
-// nest++
-template<class T>
-using ToComputedValues = decltype(toComputedValues(std::declval<T>()));
-// nest--
-
-// nest++
-// Schema -> Computed Schema
-// nest--
-// nest++
-template<class... Ts>
-auto toComputed(ADL<AllOf<Ts...>>)
-// nest++
-    -> Join<AllOf<ToComputed<Ts>...>, ToComputedValues<AllOf<Ts...>>>;
-// nest--
-// nest++
-// … keep remaining schema
-// nest--
-// nest--
-----
---
-
-== !
-
-Demo
 
 == Qt - Gui
 
 [%build]
 * Qt moc - Meta Object Compiler
 * link:https://github.com/woboq/verdigris/issues[Woboq Verdigris]
-* … with internal APIs
+* … with new APIs
 
-== Zusammenfassung
+[.cue]
+****
+Moc Compiler would require a lot of work.
+
+Verdigris from Woboq is a huge win.
+****
+
+
+[.source.s77x19]
+== !
 
 [.build]
-* Von einem Typ getriebenen Schema
-* lässt sich fast alles ableiten.
+--
+[source%nested, cpp]
+----
+// nest++
+// nest++
+template<class... Ts>
+class TupleView : public QObject {
+  W_OBJECT(TupleView)
 
-== &plus;+ Vorteile &plus;+ &nbsp;
+  // nest++
+  // nest++
+  template<size_t I, class = std::enable_if_t<(I < sizeof...(Ts))>>
+  struct RegisterProperties {
+    constexpr static auto property = 
+      // nest++
+      w_cpp::makeProperty<QVariant>(property_name<I>, qvariant_name)
+        // nest--
+        // nest++
+        .setGetter(&TupleView::getPropertyValue<I>)
+        .setSetter(&TupleView::setPropertyValue<I>)
+        .setNotify(&TupleView::propertyChanged<I>);
+        // nest--
+  };
+  // nest--
+  W_CPP_PROPERTY(RegisterProperties)
+  // nest--
+};
+// nest--
+
+template<class... Ts>
+auto toViewModel(ADL, AllOf<Ts...> *) -> TupleView<Ts...>;
+// nest--
+----
+--
+
+
+
+== Templated QObject
+
+TODO
+
+
+== Summary
+
+[.build]
+* one central type driven data schema
+* guides everything else
+
+== &plus;+ Advantages &plus;+ &nbsp;
 
 [%build]
-* Zentrales Schema Definition
-* Trennung von Logik und Daten
-* Sehr gute Testbarkeit
+* central schema definition
+* tailored to domain
+* split up data and logic
+* very good testability
 
-== \-- Nachteile \--
-
-[%build]
-* Ungewohnt + Lernaufwand
-* C++ benötigt Boilerplate
-* lange Typennamen
-
-== Anwendungsszenarien
+== \-- Disadvantages \--
 
 [%build]
-* komplexe verteilte Software
-* Performancekritische Projekte
+* uncommon + learning curve
+* C++ requires some boilerplate
+* long type names
+
+== Usage Scenarios
+
+[%build]
+* long lived distributed systems
+* performance critical systems
 
 == Links
 
@@ -1442,9 +1338,9 @@ image::rebuild_logo.png[role="pull-left", width="450"]
 * Compiler built with C++17
 ****
 
-== Probiert *mehr* aus!
+== Try out *more*!
 
-== Probiert *Typ*-getriebene-*Entwicklung*!
+== Try out *Type* Driven *Development*!
 
 == Photo Credits
 
@@ -1452,7 +1348,7 @@ image::rebuild_logo.png[role="pull-left", width="450"]
 * link:https://www.flickr.com/photos/purpleseadonkey/4775066884[Explosion] link:https://creativecommons.org/licenses/by/2.0/[(cc-by-license)]
 
 [.subtitle]
-== Danke!
+== Thank you!
 
 [language-cpp]#`co_await question_ready()`#
 
