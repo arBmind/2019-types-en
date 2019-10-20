@@ -43,21 +43,25 @@ auto oneVisit(V &&v, Fs &&... fs) {
     return std::visit(Overloaded{fs...}, v);
 }
 
-// clang-format off
 // tag::entitySet[]
-template<class Id, class Data>
-constexpr auto toCommandProcessor(ADL, EntitySet<Id, Data>*) {
-  return [](const ToCommand<EntitySet<Id, Data>> &cmd,
-            ToRepository<EntitySet<Id, Data>> &repo) {
-    oneVisit(cmd,
-        [&repo](const ToStorage<Data> &storage) {
-          repo.create(storage);
+template<class Id, class Entity>
+constexpr auto toCommandProcessor(ADL, EntitySet<Id, Entity> *) {
+    using T = EntitySet<Id, Entity>;
+    return [](const ToCommand<T> &cmd, ToRepository<T> &repo) {
+        oneVisit(
+            cmd,
+            [&repo](const command::EntityCreate<Entity> &storage) {
+                repo[repo.createId()] = storage;
+                // hint: to allow nesting you will need a storage processor
+                // to_storage_processor<Data>(storage, repo[repo.createId()]);
         },
-        [&repo](const std::tuple<Id, ToCommand<Data>> &update) {
+            [&repo](const command::EntityUpdate<Id, Entity> &update) {
           auto [id, dataCmd] = update;
-          to_command_processor<Data>(dataCmd, repo[id]);
+                to_command_processor<Entity>(dataCmd, repo[id]);
         },
-        [&repo](Id id) { repo.destroy(id); });
+            [&repo](const command::EntityDestroy<Id> &destroy) {
+                repo.destroy(destroy); //
+            });
   };
 }
 // end::entitySet[]

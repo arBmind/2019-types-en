@@ -43,19 +43,19 @@ using BeforeId = StrongAddTag<Id, struct BeforeIdTag>;
 // clang-format off
 
 // Commands for OrderedTree
-template<class Id, class Node, class Leaf>
+template<class Id, class Node>
 using TreeCreate = std::tuple<
-    ParentId<Id>, BeforeId<Id>, ToStorage<OrderedTree<Id, Node, Leaf>>>;
+    ParentId<Id>, BeforeId<Id>, ToStorage<OrderedTree<Id, Node>>>;
 
-template<class Id, class Node, class Leaf>
+template<class Id, class Node>
 using TreeUpdate = std::tuple<
-    Id, std::variant<ToCommand<Node>, ToCommand<Leaf>>>;
+    Id, std::variant<ToCommand<Node>>>;
 
-template<class Id, class Node, class Leaf>
-auto toCommand(ADL, OrderedTree<Id, Node, Leaf>*)
+template<class Id, class Node>
+auto toCommand(ADL, OrderedTree<Id, Node>*)
     -> std::variant<
-        TreeCreate<Id, Node, Leaf>,                 // Create
-        TreeUpdate<Id, Node, Leaf>,                 // Update
+        TreeCreate<Id, Node>,                       // Create
+        TreeUpdate<Id, Node>,                       // Update
         std::tuple<Id, ParentId<Id>, BeforeId<Id>>, // Move
         Id>;                                        // Destroy
 

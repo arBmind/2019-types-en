@@ -825,20 +825,20 @@ template<class Id>
 using ParentId = StrongAddTag<Id, struct ParentIdTag>;
 // nest--
 
-template<class Id, class Node, class Leaf>
+template<class Id, class Node>
 using TreeNode = std::tuple<
 // nest++
     Id, ParentId<Id>,
 // nest--
 // nest++
-    std::variant<ToStorage<Node>, ToStorage<Leaf>>
+    ToStorage<Node>
 // nest--
     >;
 // nest--
 
-template<class Id, class Node, class Leaf>
-auto toStorage(ADL, OrderedTree<Id, Node, Leaf> *)
-    -> std::vector<TreeNode<Id, Node, Leaf>>;
+template<class Id, class Node>
+auto toStorage(ADL, OrderedTree<Id, Node> *)
+    -> std::vector<TreeNode<Id, Node>>;
 // nest--
 ----
 --
@@ -916,66 +916,6 @@ What kind of commands to we need?
 Only Update is recursive!
 
 Simple enough - next up: Tree commands
-****
-
-[.source.s90x23]
-== !
-
-[.build]
---
-[source%nested, cpp]
-----
-// Commands for OrderedTree
-// nest++
-template<class Id, class Node, class Leaf>
-using TreeCreate = std::tuple<
-// nest--
-// nest++
-    ParentId<Id>, BeforeId<Id>, ToStorage<OrderedTree<Id, Node, Leaf>>>;
-// nest--
-// nest++
-template<class Id>
-using TreeDestroy = Id;
-// nest--
-// nest++
-template<class Id, class Node, class Leaf>
-using TreeUpdate = std::tuple<
-// nest--
-// nest++
-    Id, std::variant<ToCommand<Node>, ToCommand<Leaf>>>;
-// nest--
-// nest++
-template<class Id>
-using TreeMove = std::tuple<Id, ParentId<Id>, BeforeId<Id>>;
-// nest--
-
-// nest++
-template<class Id, class Node, class Leaf>
-auto toCommand(ADL, OrderedTree<Id, Node, Leaf> *)
-// nest++
-    -> std::variant<
-      // nest++
-        TreeCreate<Id, Node, Leaf>,
-      // nest--
-      // nest++
-        TreeUpdate<Id, Node, Leaf>,
-      // nest--
-      // nest++
-        TreeMove<Id>, TreeDestroy<Id>>;
-      // nest--
-// nest--
-// nest--
-----
---
-
-[.cue]
-****
-Just a notch more complex.
-
-* Create we have to know where in the tree we add a subtree.
-* Destroy just identifies the tree node to destroy.
-* Update identifies a node and what command to apply there.
-* TreeMove allows to move nodes inside the tree.
 ****
 
 == Repository

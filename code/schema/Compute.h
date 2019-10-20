@@ -13,11 +13,10 @@ auto join(AllOf<As...>, AllOf<Bs...>) -> AllOf<As..., Bs...>;
 template<class A, class B>
 using Join = decltype(join(std::declval<A>(), std::declval<B>()));
 
-
 struct ADL {};
 
 template<class T>
-using ToComputed = decltype(toComputed(ADL, Ptr<T>{}));
+using ToComputed = decltype(toComputed(ADL{}, Ptr<T>{}));
 
 template<class T>
 using ToComputedValues = decltype(toComputedValues(std::declval<T>()));

@@ -47,11 +47,11 @@ auto toStorage(ADL, T *) -> std::enable_if_t<isValue<T>(), T>;
 template<class Id>
 using ParentId = StrongAddTag<Id, struct ParentIdTag>;
 
-template<class Id, class Node, class Leaf>
-using TreeNode = std::tuple<Id, ParentId<Id>, std::variant<ToStorage<Node>, ToStorage<Leaf>>>;
+template<class Id, class Node>
+using TreeNode = std::tuple<Id, ParentId<Id>, std::variant<ToStorage<Node>>>;
 
-template<class Id, class Node, class Leaf>
-auto toStorage(ADL, OrderedTree<Id, Node, Leaf> *) -> std::vector<TreeNode<Id, Node, Leaf>>;
+template<class Id, class Node>
+auto toStorage(ADL, OrderedTree<Id, Node> *) -> std::vector<TreeNode<Id, Node>>;
 // end::orderedtree[]
 
 } // namespace storage

@@ -13,7 +13,7 @@ template<class Id, class> struct IdMap {};
 
 // clang-format on
 
-template<class Id, class Node, class Leaf>
+template<class Id, class Node>
 struct OrderedTree {};
 
 template<class T>
