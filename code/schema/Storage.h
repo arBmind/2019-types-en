@@ -23,8 +23,8 @@ auto toStorage(ADL, AllOf<Ts...> *) -> std::tuple<ToStorage<Ts>...>;
 template<class... Ts>
 auto toStorage(ADL, OneOf<Ts...> *) -> std::variant<ToStorage<Ts>...>;
 
-template<class Id, class Data>
-auto toStorage(ADL, EntitySet<Id, Data> *) -> std::vector<std::tuple<Id, ToStorage<Data>>>;
+template<class Id, class Entity>
+auto toStorage(ADL, EntitySet<Id, Entity> *) -> std::vector<std::tuple<Id, ToStorage<Entity>>>;
 // end::abstracts[]
 
 // tag::values[]

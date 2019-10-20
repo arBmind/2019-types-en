@@ -25,16 +25,16 @@ auto toCommand(ADL, AllOf<Ts...> *) -> std::tuple<ToCommand<Ts>...>;
 template<class T>
 auto toCommand(ADL, T *) -> std::enable_if_t<is_value<T>, std::optional<T>>;
 
-template<class Data>
-using EntityCreate = ToStorage<Data>;
+template<class Entity>
+using EntityCreate = ToStorage<Entity>;
 template<class Id>
 using EntityDestroy = Id;
-template<class Id, class Data>
-using EntityUpdate = std::tuple<Id, ToCommand<Data>>;
+template<class Id, class Entity>
+using EntityUpdate = std::tuple<Id, ToCommand<Entity>>;
 
-template<class Id, class Data>
-auto toCommand(ADL, EntitySet<Id, Data> *)
-    -> std::variant<EntityCreate<Data>, EntityDestroy<Id>, EntityUpdate<Id, Data>>;
+template<class Id, class Entity>
+auto toCommand(ADL, EntitySet<Id, Entity> *)
+    -> std::variant<EntityCreate<Entity>, EntityDestroy<Id>, EntityUpdate<Id, Entity>>;
 
 using storage::ParentId;
 template<class Id>

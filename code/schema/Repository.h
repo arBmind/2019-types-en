@@ -29,8 +29,8 @@ auto toRepository(ADL, T *) -> std::enable_if_t<is_value<T>, T>;
 namespace simple {
 
 // tag::simpleEntitySet[]
-template<class Id, class Data>
-auto toRepository(ADL, EntitySet<Id, Data> *) -> std::map<Id, ToRepository<Data>>;
+template<class Id, class Entity>
+auto toRepository(ADL, EntitySet<Id, Entity> *) -> std::map<Id, ToRepository<Entity>>;
 // end::simpleEntitySet[]
 
 } // namespace simple
@@ -41,9 +41,9 @@ struct Less {
 };
 
 // tag::entityRepository[]
-template<class Id, class Data>
+template<class Id, class EntityRepo>
 class EntityRepository {
-    std::map<Id, ToRepository<Data>, Less<Id>> m;
+    std::map<Id, EntityRepo, Less<Id>> m;
 
 public:
     auto begin() const { return m.begin(); }
@@ -51,40 +51,40 @@ public:
 
     bool contains(Id) const;
     auto count() const { return m.size(); }
-    auto operator[](Id) -> ToRepository<Data> &;
-    auto operator[](Id) const -> const ToRepository<Data> &;
-    void create(const ToStorage<Data> &);
+    auto operator[](Id) -> EntityRepo &;
+    auto operator[](Id) const -> const EntityRepo &;
+    auto createId() -> Id;
     void destroy(Id);
 };
 
-template<class Id, class Data>
-auto toRepository(ADL, EntitySet<Id, Data> *) //
-    -> EntityRepository<Id, Data>;
+template<class Id, class Entity>
+auto toRepository(ADL, EntitySet<Id, Entity> *) //
+    -> EntityRepository<Id, ToRepository<Entity>>;
 // end::entityRepository[]
 
 // implementation
-template<class Id, class Data>
-bool EntityRepository<Id, Data>::contains(Id id) const {
+template<class Id, class EntityRepo>
+bool EntityRepository<Id, EntityRepo>::contains(Id id) const {
     return m.find(id) != m.end();
 }
 
-template<class Id, class Data>
-auto EntityRepository<Id, Data>::operator[](Id id) -> ToRepository<Data> & {
+template<class Id, class EntityRepo>
+auto EntityRepository<Id, EntityRepo>::operator[](Id id) -> EntityRepo & {
     return m[id];
 }
-template<class Id, class Data>
-auto EntityRepository<Id, Data>::operator[](Id id) const -> const ToRepository<Data> & {
+template<class Id, class EntityRepo>
+auto EntityRepository<Id, EntityRepo>::operator[](Id id) const -> const EntityRepo & {
     return m[id];
 }
 
-template<class Id, class Data>
-auto EntityRepository<Id, Data>::create(const ToStorage<Data> &data) -> void {
+template<class Id, class EntityRepo>
+auto EntityRepository<Id, EntityRepo>::createId() -> Id {
     static auto id = 0;
-    m.insert_or_assign(Id{++id}, data);
+    return Id{++id};
 }
 
-template<class Id, class Data>
-auto EntityRepository<Id, Data>::destroy(Id id) -> void {
+template<class Id, class EntityRepo>
+auto EntityRepository<Id, EntityRepo>::destroy(Id id) -> void {
     m.erase(id);
 }
 

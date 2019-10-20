@@ -23,8 +23,8 @@ template<class T>
 using ToViewModel = decltype(toViewModel(ADL{}, Ptr<T>{}));
 
 template<class... Ts>
-class TupleView : public QObject {
-    W_OBJECT(TupleView)
+class AllOfView : public QObject {
+    W_OBJECT(AllOfView)
 
     using Repository = repository::ToRepository<AllOf<Ts...>>;
     Repository *m_repository{};
@@ -33,14 +33,14 @@ class TupleView : public QObject {
     using PropertyAt = std::remove_reference_t<decltype(std::get<I>(std::declval<Repository>()))>;
 
 public:
-    TupleView(Repository *repo, QObject *parent = {})
+    AllOfView(Repository *repo, QObject *parent = {})
         : QObject(parent)
         , m_repository(repo) {}
 
 private:
     template<size_t I>
     void propertyChanged() {
-        W_CPP_SIGNAL_IMPL(decltype(&TupleView::propertyChanged<I>), PropertyChangedSignals, I, 0);
+        W_CPP_SIGNAL_IMPL(decltype(&AllOfView::propertyChanged<I>), PropertyChangedSignals, I, 0);
     }
 
     template<size_t I, class = std::enable_if_t<(I < sizeof...(Ts))>>
@@ -48,7 +48,7 @@ private:
         using Property = PropertyAt<I>;
         constexpr static auto signalName = names::property_changed_name<Property>;
         constexpr static auto signal =
-            w_cpp::makeSignalBuilder(signalName, &TupleView::propertyChanged<I>).build();
+            w_cpp::makeSignalBuilder(signalName, &AllOfView::propertyChanged<I>).build();
     };
     W_CPP_SIGNAL(PropertyChangedSignals)
 
@@ -91,24 +91,25 @@ private:
     struct RegisterProperties {
         constexpr static auto property =
             w_cpp::makeProperty<QVariant>(property_name<I>, qvariant_name)
-                .setGetter(&TupleView::getPropertyValue<I>)
-                .setSetter(&TupleView::setPropertyValue<I>)
-                .setNotify(&TupleView::propertyChanged<I>);
+                .setGetter(&AllOfView::getPropertyValue<I>)
+                .setSetter(&AllOfView::setPropertyValue<I>)
+                .setNotify(&AllOfView::propertyChanged<I>);
     };
     W_CPP_PROPERTY(RegisterProperties)
 };
-W_OBJECT_IMPL((TupleView<Ts...>), template<class... Ts>)
+W_OBJECT_IMPL((AllOfView<Ts...>), template<class... Ts>)
 
 template<class... Ts>
-auto toViewModel(ADL, AllOf<Ts...> *) -> TupleView<Ts...>;
+auto toViewModel(ADL, AllOf<Ts...> *) -> AllOfView<Ts...>;
 
-template<class Id, class Data>
-class EntityModel : public QAbstractListModel {
-    using Repository = repository::ToRepository<EntitySet<Id, Data>>;
+template<class Id, class Entity>
+class EntitySetModel : public QAbstractListModel {
+    using T = EntitySet<Id, Entity>;
+    using Repository = repository::ToRepository<T>;
     Repository *m_repository{};
 
 public:
-    EntityModel(Repository *repo, QObject *parent = {})
+    EntitySetModel(Repository *repo, QObject *parent = {})
         : QAbstractListModel(parent)
         , m_repository(repo) {}
 
@@ -136,18 +137,19 @@ public:
     }
 };
 
-template<class Id, class Data>
-class EntityView : public QObject {
-    W_OBJECT(EntityView)
+template<class Id, class Entity>
+class EntitySetView : public QObject {
+    W_OBJECT(EntitySetView)
 
-    using Repository = repository::ToRepository<EntitySet<Id, Data>>;
+    using TT = EntitySet<Id, Entity>;
+    using Repository = repository::ToRepository<TT>;
     Repository *m_repository{};
 
-    using Model = EntityModel<Id, Data>;
+    using Model = EntitySetModel<Id, Entity>;
     Model *m_model{};
 
 public:
-    EntityView(Repository *repo, QObject *parent = {})
+    EntitySetView(Repository *repo, QObject *parent = {})
         : QObject(parent)
         , m_repository(repo)
         , m_model(new Model(m_repository, this)) {}
@@ -163,17 +165,17 @@ public:
         if (!m_repository->contains(id)) return nullptr;
         auto &value = (*m_repository)[id];
 
-        using Entity = ToViewModel<Data>;
-        return new Entity(&value);
+        using EntityModel = ToViewModel<Entity>;
+        return new EntityModel(&value);
     }
     W_INVOKABLE(entity)
 };
 // clang-format off
-W_OBJECT_IMPL((EntityView<Id,Data>), template<class Id, class Data>)
+W_OBJECT_IMPL((EntitySetView<Id,Entity>), template<class Id, class Entity>)
 // clang-format on
 
-template<class Id, class Data>
-auto toViewModel(ADL, EntitySet<Id, Data> *) //
-    -> EntityView<Id, Data>;
+template<class Id, class Entity>
+auto toViewModel(ADL, EntitySet<Id, Entity> *) //
+    -> EntitySetView<Id, Entity>;
 
 } // namespace view_model

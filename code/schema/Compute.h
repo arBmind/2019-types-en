@@ -34,8 +34,7 @@ auto toComputed(ADL, OneOf<Ts...> *) -> OneOf<ToComputed<Ts>...>;
 template<class T>
 auto toComputed(ADL, T *) -> std::enable_if_t<is_value<T>, T>;
 
-template<class Id, class Data>
-auto toComputed(ADL, EntitySet<Id, Data> *)
-    -> EntitySet<Id, ToComputed<Data>>;
+template<class Id, class Entity>
+auto toComputed(ADL, EntitySet<Id, Entity> *) -> EntitySet<Id, ToComputed<Entity>>;
 
 } // namespace compute
