@@ -36,27 +36,4 @@ template<class Id, class Entity>
 auto toCommand(ADL, EntitySet<Id, Entity> *)
     -> std::variant<EntityCreate<Entity>, EntityDestroy<Id>, EntityUpdate<Id, Entity>>;
 
-using storage::ParentId;
-template<class Id>
-using BeforeId = StrongAddTag<Id, struct BeforeIdTag>;
-
-// clang-format off
-
-// Commands for OrderedTree
-template<class Id, class Node>
-using TreeCreate = std::tuple<
-    ParentId<Id>, BeforeId<Id>, ToStorage<OrderedTree<Id, Node>>>;
-
-template<class Id, class Node>
-using TreeUpdate = std::tuple<
-    Id, std::variant<ToCommand<Node>>>;
-
-template<class Id, class Node>
-auto toCommand(ADL, OrderedTree<Id, Node>*)
-    -> std::variant<
-        TreeCreate<Id, Node>,                       // Create
-        TreeUpdate<Id, Node>,                       // Update
-        std::tuple<Id, ParentId<Id>, BeforeId<Id>>, // Move
-        Id>;                                        // Destroy
-
 } // namespace command
