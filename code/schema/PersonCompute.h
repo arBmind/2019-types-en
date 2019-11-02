@@ -6,10 +6,10 @@
 
 namespace person {
 
-using storage::ToStorage;
+using storage::StorageFor;
 
 // tag::ansprache[]
-inline void computeComputed(const ToStorage<PersonData> &s, Introduction &o) {
+inline void computeComputed(const StorageFor<PersonData> &s, Introduction &o) {
     auto [name, role] = s;
     auto out = std::stringstream{};
     switch (role) {

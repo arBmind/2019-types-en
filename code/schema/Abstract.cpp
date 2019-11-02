@@ -1,3 +1,0 @@
-#include "Abstract.h"
-
-// empty

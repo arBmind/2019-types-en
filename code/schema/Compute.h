@@ -3,9 +3,9 @@
 
 namespace compute {
 
-using namespace abstract;
+using namespace recursive;
 using storage::is_value;
-using storage::ToStorage;
+using storage::StorageFor;
 
 template<class... As, class... Bs>
 auto join(AllOf<As...>, AllOf<Bs...>) -> AllOf<As..., Bs...>;
@@ -14,27 +14,27 @@ template<class A, class B>
 using Join = decltype(join(std::declval<A>(), std::declval<B>()));
 
 struct ADL {};
+constexpr auto adl = ADL{};
 
 template<class T>
-using ToComputed = decltype(toComputed(ADL{}, Ptr<T>{}));
+using ComputedFor = decltype(computedFor(adl, ptr<T>));
 
 template<class T>
-using ToComputedValues = decltype(toComputedValues(std::declval<T>()));
+using ComputedValuesFor = decltype(computedValuesFor(std::declval<T>()));
 
 // Schema -> Computed Schema
 template<class... Ts>
-auto toComputed(ADL, AllOf<Ts...> *)
-    -> Join<AllOf<ToComputed<Ts>...>, ToComputedValues<AllOf<Ts...>>>;
+auto computedFor(ADL, AllOf<Ts...> *)
+    -> Join<AllOf<ComputedFor<Ts>...>, ComputedValuesFor<AllOf<Ts...>>>;
 // … keep remaining schema
-// end::toComputedValues[]
 
 template<class... Ts>
-auto toComputed(ADL, OneOf<Ts...> *) -> OneOf<ToComputed<Ts>...>;
+auto computedFor(ADL, OneOf<Ts...> *) -> OneOf<ComputedFor<Ts>...>;
 
 template<class T>
-auto toComputed(ADL, T *) -> std::enable_if_t<is_value<T>, T>;
+auto computedFor(ADL, T *) -> std::enable_if_t<is_value<T>, T>;
 
 template<class Id, class Entity>
-auto toComputed(ADL, EntitySet<Id, Entity> *) -> EntitySet<Id, ToComputed<Entity>>;
+auto computedFor(ADL, EntitySet<Id, Entity> *) -> EntitySet<Id, ComputedFor<Entity>>;
 
 } // namespace compute

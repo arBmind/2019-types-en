@@ -1,6 +1,6 @@
 #pragma once
 #include "../strong/Strong.h"
-#include "Abstract.h"
+#include "Recursive.h"
 #include "Repository.h"
 #include "names.h"
 
@@ -15,27 +15,76 @@
 
 namespace view_model {
 
-using namespace abstract;
+using namespace recursive;
 
-struct ADL {};
+// clang-format off
+constexpr struct ADL {} adl = {};
+// clang-format on
 
 template<class T>
-using ToViewModel = decltype(toViewModel(ADL{}, Ptr<T>{}));
+using ViewModelFor = decltype(viewModelFor(adl, ptr<T>));
+
+template<class T>
+auto makeQVariantFrom(const T &value) -> QVariant {
+    if constexpr (std::is_enum_v<T>)
+        return static_cast<std::underlying_type_t<T>>(value);
+    else if constexpr (is_strong<T>) {
+        if constexpr (std::is_same_v<std::string, decltype(value.v)>)
+            return QString::fromStdString(value.v);
+        else
+            return QVariant::fromValue(value.v);
+    }
+}
+template<class T>
+auto makeValueFrom(const QVariant &variant) -> T {
+    if constexpr (std::is_enum_v<T>) {
+        using V = std::underlying_type_t<T>;
+        return static_cast<T>(variant.value<V>());
+    }
+    else if constexpr (is_strong<T>) {
+        using V = decltype(std::declval<T>().v);
+        if constexpr (std::is_same_v<std::string, V>)
+            return T{variant.value<QString>().toStdString()};
+        else
+            return T{variant.value<V>()};
+    }
+}
+
+template<class T, class R>
+auto makeViewModelFor(R &repo, QObject *parent) -> QObject * {
+    if constexpr (is_recursive<T>) {
+        return new ViewModelFor<T>(repo, parent);
+    }
+    return nullptr;
+}
 
 template<class... Ts>
 class AllOfView : public QObject {
     W_OBJECT(AllOfView)
 
-    using Repository = repository::ToRepository<AllOf<Ts...>>;
-    Repository *m_repository{};
+    using Repository = repository::RepositoryFor<AllOf<Ts...>>;
+    Repository &m_repository{};
+    template<size_t I>
+    using RepositoryAt = std::remove_reference_t<decltype(std::get<I>(std::declval<Repository>()))>;
+
+    using QObjectTuple = std::tuple<std::conditional_t<true, QObject *, Ts>...>;
+    QObjectTuple m_views{};
+
+    constexpr static auto qvariant_name = w_cpp::viewLiteral("QVariant");
+
+    using TsTuple = std::tuple<Ts...>;
+    template<size_t I>
+    using PropertyAt = std::remove_reference_t<decltype(std::get<I>(std::declval<TsTuple>()))>;
 
     template<size_t I>
-    using PropertyAt = std::remove_reference_t<decltype(std::get<I>(std::declval<Repository>()))>;
+    constexpr static auto property_name = names::property_name<PropertyAt<I>>;
 
 public:
-    AllOfView(Repository *repo, QObject *parent = {})
+    AllOfView(Repository &repo, QObject *parent = {})
         : QObject(parent)
-        , m_repository(repo) {}
+        , m_repository(repo)
+        , m_views(makeViewModelFor<Ts>( //
+              std::get<repository::RepositoryFor<Ts>>(m_repository), this)...) {}
 
 private:
     template<size_t I>
@@ -54,38 +103,23 @@ private:
 
     template<size_t I>
     auto getPropertyValue() const -> QVariant {
-        const auto &property = std::get<I>(*m_repository);
-        using Property = PropertyAt<I>;
-        if constexpr (std::is_enum_v<Property>)
-            return static_cast<std::underlying_type_t<Property>>(property);
+        if constexpr (is_recursive<PropertyAt<I>>) {
+            return std::get<I>(m_views);
+        }
         else {
-            using ValueType = decltype(std::declval<Property>().v);
-            if constexpr (std::is_same_v<std::string, ValueType>)
-                return QVariant(QString::fromStdString(property.v));
-            else
-                return QVariant::fromValue(property.v);
+            return makeQVariantFrom(std::get<I>(m_repository));
         }
     }
     template<size_t I>
     void setPropertyValue(QVariant variant) {
-        auto &property = std::get<I>(*m_repository);
-        using Property = PropertyAt<I>;
-        if constexpr (std::is_enum_v<Property>) {
-            using ValueType = std::underlying_type_t<Property>;
-            property = static_cast<Property>(variant.value<ValueType>());
+        if constexpr (is_recursive<PropertyAt<I>>) {
+            // no set supported!
         }
         else {
-            using ValueType = decltype(std::declval<Property>().v);
-            if constexpr (std::is_same_v<std::string, ValueType>)
-                property.v = variant.value<QString>().toStdString();
-            else
-                property.v = variant.value<ValueType>();
+            std::get<I>(m_repository) = makeValueFrom<PropertyAt<I>>(variant);
+            propertyChanged<I>(); // send notification for the property
         }
-        propertyChanged<I>(); // send notification for the property
     }
-    template<size_t I>
-    constexpr static auto property_name = names::property_name<PropertyAt<I>>;
-    constexpr static auto qvariant_name = w_cpp::viewLiteral("QVariant");
 
     template<size_t I, class = std::enable_if_t<(I < sizeof...(Ts))>>
     struct RegisterProperties {
@@ -97,19 +131,19 @@ private:
     };
     W_CPP_PROPERTY(RegisterProperties)
 };
-W_OBJECT_IMPL((AllOfView<Ts...>), template<class... Ts>)
+W_OBJECT_IMPL(AllOfView<Ts...>, template<class... Ts>)
 
 template<class... Ts>
-auto toViewModel(ADL, AllOf<Ts...> *) -> AllOfView<Ts...>;
+auto viewModelFor(ADL, AllOf<Ts...> *) -> AllOfView<Ts...>;
 
 template<class Id, class Entity>
 class EntitySetModel : public QAbstractListModel {
     using T = EntitySet<Id, Entity>;
-    using Repository = repository::ToRepository<T>;
-    Repository *m_repository{};
+    using Repository = repository::RepositoryFor<T>;
+    Repository &m_repository{};
 
 public:
-    EntitySetModel(Repository *repo, QObject *parent = {})
+    EntitySetModel(Repository &repo, QObject *parent = {})
         : QAbstractListModel(parent)
         , m_repository(repo) {}
 
@@ -117,18 +151,18 @@ public:
 public:
     QModelIndex index(int row, int column, const QModelIndex &parent) const override {
         Q_UNUSED(parent)
-        if (std::distance(m_repository->begin(), m_repository->end()) <= row) {
+        if (std::distance(m_repository.begin(), m_repository.end()) <= row) {
             qWarning() << "EntityModel::index: " << row << "out of bounds;";
             return {};
         }
-        auto i = m_repository->begin();
+        auto i = m_repository.begin();
         std::advance(i, row);
 
         return createIndex(row, column, i->first.v);
     }
     int rowCount(const QModelIndex &parent = {}) const override {
         Q_UNUSED(parent)
-        return m_repository->count();
+        return m_repository.count();
     }
     QVariant data(const QModelIndex &index, int role) const override {
         Q_UNUSED(role)
@@ -142,14 +176,14 @@ class EntitySetView : public QObject {
     W_OBJECT(EntitySetView)
 
     using TT = EntitySet<Id, Entity>;
-    using Repository = repository::ToRepository<TT>;
-    Repository *m_repository{};
+    using Repository = repository::RepositoryFor<TT>;
+    Repository &m_repository{};
 
     using Model = EntitySetModel<Id, Entity>;
     Model *m_model{};
 
 public:
-    EntitySetView(Repository *repo, QObject *parent = {})
+    EntitySetView(Repository &repo, QObject *parent = {})
         : QObject(parent)
         , m_repository(repo)
         , m_model(new Model(m_repository, this)) {}
@@ -162,11 +196,11 @@ public:
     auto entity(int qmlId) -> QObject * {
         auto id = Id{qmlId};
 
-        if (!m_repository->contains(id)) return nullptr;
-        auto &value = (*m_repository)[id];
+        if (!m_repository.contains(id)) return nullptr;
+        auto &value = m_repository[id];
 
-        using EntityModel = ToViewModel<Entity>;
-        return new EntityModel(&value);
+        using EntityModel = ViewModelFor<Entity>;
+        return new EntityModel(value);
     }
     W_INVOKABLE(entity)
 };
@@ -175,7 +209,7 @@ W_OBJECT_IMPL((EntitySetView<Id,Entity>), template<class Id, class Entity>)
 // clang-format on
 
 template<class Id, class Entity>
-auto toViewModel(ADL, EntitySet<Id, Entity> *) //
+auto viewModelFor(ADL, EntitySet<Id, Entity> *) //
     -> EntitySetView<Id, Entity>;
 
 } // namespace view_model

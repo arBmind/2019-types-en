@@ -26,8 +26,6 @@ Project {
         name: "schema"
         Depends { name: "cpp17" }
         files: [
-            "Abstract.cpp",
-            "Abstract.h",
             "Command.cpp",
             "Command.h",
             "Compute.cpp",
@@ -40,6 +38,8 @@ Project {
             "PersonSchema.h",
             "Processor.cpp",
             "Processor.h",
+            "Recursive.cpp",
+            "Recursive.h",
             "Repository.cpp",
             "Repository.h",
             "Storage.cpp",

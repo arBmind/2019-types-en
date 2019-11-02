@@ -1,5 +1,5 @@
 #pragma once
-#include "Abstract.h"
+#include "Recursive.h"
 
 #include <tuple>
 #include <type_traits>
@@ -7,17 +7,17 @@
 
 namespace storage {
 
-using namespace abstract;
+using namespace recursive;
 
 template<class T>
-auto toStorage(T);
+auto storageFor(T);
 
 template<class T>
-using ToStorage = decltype(toStorage(std::declval<T>()));
+using StorageFor = decltype(storageFor(std::declval<T>()));
 
 template<class... Ts>
-auto toStorage(AllOf<Ts...>) -> std::tuple<ToStorage<Ts>...>;
+auto storageFor(AllOf<Ts...>) -> std::tuple<StorageFor<Ts>...>;
 
-// using Test = ToStorage<AllOf<>>; // error
+// using Test = StorageFor<AllOf<>>; // error
 
 } // namespace storage

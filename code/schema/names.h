@@ -7,12 +7,13 @@ namespace names {
 using namespace person;
 
 struct ADL {};
+constexpr auto adl = ADL{};
 
 template<class T>
-constexpr auto property_name = getPropertyName(ADL{}, Ptr<T>{});
+constexpr auto property_name = getPropertyName(adl, ptr<T>);
 
 template<class T>
-constexpr auto property_changed_name = getPropertyChangedName(ADL{}, Ptr<T>{});
+constexpr auto property_changed_name = getPropertyChangedName(adl, ptr<T>);
 
 // tag::propertyNames[]
 constexpr auto getPropertyName(ADL, Name *) { return w_cpp::viewLiteral("name"); }

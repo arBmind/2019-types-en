@@ -15,3 +15,9 @@ auto strongAddTag(Type<Strong<V, Tags...>>) -> Strong<V, Tags..., Tag>;
 
 template<class Strong, class Tag>
 using StrongAddTag = decltype(strongAddTag<Tag>(Type<Strong>{}));
+
+template<class T>
+constexpr auto is_strong = false;
+
+template<class V, class... Tags>
+constexpr auto is_strong<Strong<V, Tags...>> = true;

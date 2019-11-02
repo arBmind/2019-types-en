@@ -11,20 +11,21 @@
 
 using namespace person;
 
+using command::CommandFor;
 using command::EntityCreate;
-using command::ToCommand;
-using processor::to_command_processor;
-using repository::ToRepository;
+using processor::command_processor_for;
+using repository::RepositoryFor;
 
-using Command = ToCommand<Persons>;
-using Repository = ToRepository<Persons>;
-constexpr auto processCommand = to_command_processor<Persons>;
-using ViewModel = view_model::ToViewModel<person::Persons>;
+using Command = CommandFor<Persons>;
+using Repository = RepositoryFor<Persons>;
+constexpr auto processCommand = command_processor_for<Persons>;
+using ViewModel = view_model::ViewModelFor<person::Persons>;
 
 constexpr auto W_ClassNameOverride(w_internal::W_TypeWrap<ViewModel> = {}) {
     return w_cpp::viewLiteral("ViewModel");
 }
-constexpr auto W_ClassNameOverride(w_internal::W_TypeWrap<view_model::ToViewModel<person::PersonData>> = {}) {
+constexpr auto
+W_ClassNameOverride(w_internal::W_TypeWrap<view_model::ViewModelFor<person::PersonData>> = {}) {
     return w_cpp::viewLiteral("PersonDataView");
 }
 
@@ -36,7 +37,8 @@ int main(int argc, char *argv[]) {
     QQmlApplicationEngine engine{};
 
     qmlRegisterUncreatableType<ViewModel>("SchemaGui", 1, 0, "ViewModel", "restricted");
-    qmlRegisterUncreatableType<view_model::ToViewModel<person::PersonData>>("SchemaGui", 1, 0, "PersonDataView", "restricted");
+    qmlRegisterUncreatableType<view_model::ViewModelFor<person::PersonData>>(
+        "SchemaGui", 1, 0, "PersonDataView", "restricted");
 
     auto repo = Repository{};
     using CreateCmd = EntityCreate<PersonData>;
@@ -44,7 +46,7 @@ int main(int argc, char *argv[]) {
     processCommand(CreateCmd{Name{"Albert Einstein"}, Role::Teacher}, repo);
     processCommand(CreateCmd{Name{"Gyro Gearloose"}, Role::Student}, repo);
 
-    auto model = ViewModel{&repo};
+    auto model = ViewModel{repo};
 
     auto context = engine.rootContext();
     context->setContextProperty("view_model", &model);

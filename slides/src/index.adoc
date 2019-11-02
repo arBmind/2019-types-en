@@ -34,152 +34,12 @@ Goals of this talk:
 Hopefully for everybody I have something unknown!
 ****
 
-[.subtitle]
-== What is a type?
 
-[.cue]
-****
-It depends on who you ask?
-****
-
-== What is a type?: …for the CPU
+== Distributed System
 
 [%build]
-* Understanding the bits
-* How to compute on bits
-* Alignment
-
-[.cue]
-****
-* Hardware / Interpretation of Bits
-* Float vs Int vs SSE
-****
-
-== What is a type?: …for a Compiler
-
-[%build]
-* Aggregate
-* Amount of bytes
-* Lifecycle
-
-[.cue]
-****
-* Classes, Arrays, … (Memory layout)
-* Protection against accidental misuse
-****
-
-== What is a type?: …for the developer
-
-[%build]
-* Architectural entities
-* Semantics
-* Functions
-
-[.cue]
-****
-* Guidance for structuring code
-* APIs / Management
-* Controller / Repositories
-****
-
-== !
-
-[.canvas]
-image::Zirkelstein.jpg[]
-
-[.cue]
-****
-* Ok, I hope you can follow my story
-* Now, get to C++
-****
-
-
-[.subtitle]
-== Strong Types
-
-[.cue]
-****
-* Let's implement simple strong types
-
-To motivate this let's look at the issue…
-****
-
-[.source.s62x16]
-== !
-
-[.build]
---
-[source%nested, cpp, subs=quotes,macros]
-----
-using Distance = double; // Alias
-// nest++
-auto d = Distance{3} + 2; // [.green]##Ok##: just double
-// nest--
-
-// nest++
-using Velocity = Strong&lt;double, struct VelocityTag>;
-// nest--
-// nest++
-auto v = Velocity{3} + 2; // [.red]##Error##: no operator
-// nest--
-----
---
-
-[.cue]
-****
-* Type alias create no boundaries
-
-But a tagged template creates a unique type
-
-How might the simplest implementation look like?
-****
-
-[.source]
-== !
-
-[.build]
---
-[source%nested, cpp, subs=quotes,macros]
-----
-template&lt;class V, class... /\*Tags*/>
-struct Strong {
-    // nest++
-    [.token.class-name]##V## v{};
-    // nest--
-};
-----
---
-
-[.cue]
-****
-* The template signature: base type and any amount of tags
-* Inside we store just the value
-
-You might want to add operators, but that's enough for this talk.
-
-If you want to learn more about strong types…
-****
-
-== !
-
-image::BarneyDellar_StrongTypes_CppOnSea.png[role="center", width="1280"]
-
-link:https://www.youtube.com/watch?v=fWcnp7Bulc8[Strong Types in C++ - Barney Dellar [C++ on Sea 2019]]
-
-[.cue]
-****
-There are a lot of good talks and blog posts.
-
-If you want to stick to standard take a look at <chronos>.
-
-****
-
-
-== Type Driven Applications
-
-[%build]
-* imagine a distributed system
-* (note: still slide example)
+* complex!
+* (note: simplified for slides!)
 
 == !
 
@@ -201,7 +61,7 @@ If you want to stick to standard take a look at <chronos>.
                 <feMergeNode in="SourceGraphic"/>
             </feMerge>
         </filter>
-        <rect id="activeRect" x="2%" y="2%" width="96%" height="96%" fill="#fff" rx="20" ry="20" fill-opacity="0" stroke="#8da" stroke-width="15" />
+        <rect id="activeRect" x="2%" y="2%" width="96%" height="96%" fill="#fff" rx="20" ry="20" fill-opacity="0" stroke="#41CD52" stroke-width="15" />
         <filter id="activeMarker" filterUnits="objectBoundingBox">
             <feImage xlink:href="#activeRect" preserveAspectRatio="none" />
             <feMerge> 
@@ -403,16 +263,239 @@ If you want to stick to standard take a look at <chronos>.
 </svg> 
 ++++
 
+[.section]
+== How can we design this?
+
+[%build]
+* data flow is clear
+* ensure data compatibility
+* communicate with developers
+
+
+[.subtitle]
+== Strong Types
+
+[.cue]
+****
+* Let's begin at the bottom
+
+Why strong types?
+****
+
+
+[.source.hd]
+== !
+
+[source, cpp, subs=quotes,macros]
+----
+struct Point {
+    double x;
+    double y;
+    double z;
+};
+----
+
+[.source.hd]
+== !
+
+[source%nested, cpp]
+----
+struct Point {
+    double x;
+    double y;
+    double z;
+    // nest++
+    double weight;
+    // nest--
+};
+----
+
+[.source.hd]
+== !
+
+[source%nested, cpp]
+----
+struct Point {
+    double x;
+    double y;
+    double z;
+    double weight;
+    // nest++
+    double texX;
+    double texY;
+    // nest--
+};
+----
+
+[.source.hd]
+== !
+
+[.build]
+--
+[source%nested, cpp, subs=quotes,macros]
+----
+struct X { double v{}; };
+// nest++
+struct Y { double v{}; };
+struct Z { double v{}; };
+// nest--
+
+// nest++
+struct Point {
+    [.token.class-name]##X## x;
+    [.token.class-name]##Y## y;
+    [.token.class-name]##Z## z;
+};
+// nest--
+----
+--
+
+
+[.source.hd]
+== !
+
+[source%nested, cpp, subs=quotes,macros]
+----
+struct X { double v{}; };
+struct Y { double v{}; };
+struct Z { double v{}; };
+
+// nest++
+using [.token.class-name]##Point## = std::tuple&lt;[.token.class-name]##X##, [.token.class-name]##Y##, [.token.class-name]##Z##>;
+// nest--
+----
+
+
+[.source]
+== !
+
+[.build]
+--
+[source%nested, cpp, subs=quotes,macros]
+----
+// nest++
+template&lt;class V, class /\*Tag*/ >
+// nest--
+struct Strong {
+    // nest++
+    [.token.class-name]##V## v{};
+    // nest--
+};
+----
+--
+
+[.cue]
+****
+* The template signature: base type and any amount of tags
+* Inside we store just the value
+
+You might want to add operators, but that's enough for this talk.
+
+If you want to learn more about strong types…
+****
+
+
+== !
+
+image::BarneyDellar_StrongTypes_CppOnSea.png[role="center", width="1280"]
+
+link:https://www.youtube.com/watch?v=fWcnp7Bulc8[Strong Types in C\++ - Barney Dellar [C++ on Sea 2019]]
+
+[.cue]
+****
+There are a lot of good talks and blog posts.
+
+If you want to stick to standard take a look at <chronos>.
+
+****
+
+
+[.source.hd]
+== !
+
+[.build]
+--
+[source%nested, cpp, subs=quotes,macros]
+----
+using [.token.string]##X## = [.token.class-name]##Strong##&lt;double, struct XTag>;
+// nest++
+using [.token.string]##Y## = [.token.class-name]##Strong##&lt;double, struct YTag>;
+using [.token.string]##Z## = [.token.class-name]##Strong##&lt;double, struct ZTag>;
+// nest--
+
+// nest++
+struct Point {
+    [.token.string]##X## x;
+    [.token.string]##Y## y;
+    [.token.string]##Z## z;
+};
+// nest--
+----
+--
+
+
+[.cue]
+****
+* So we use our strong type
+* Build the tag type just in place
+* They are just to make each type different
+****
+
+[.source.hd]
+== !
+
+[source%nested, cpp, subs=quotes,macros]
+----
+using [.token.string]##X## = [.token.class-name]##Strong##&lt;double, struct XTag>;
+using [.token.string]##Y## = [.token.class-name]##Strong##&lt;double, struct YTag>;
+using [.token.string]##Z## = [.token.class-name]##Strong##&lt;double, struct ZTag>;
+
+// nest++
+using [.token.class-name]##Point## = std::tuple&lt;[.token.string]##X##, [.token.string]##Y##, [.token.string]##Z##>;
+// nest--
+----
+
+
+[.cue]
+****
+* Tuple is an implementation that stores all our values
+
+If we design our distributed system, we do not really care about storage details.
+A network protocol will use something different to transport the data.
+****
+
+[.source.hd]
+== !
+
+[source%nested, cpp, subs=quotes,macros]
+----
+using [.token.string]##X## = [.token.class-name]##Strong##&lt;double, struct XTag>;
+using [.token.string]##Y## = [.token.class-name]##Strong##&lt;double, struct YTag>;
+using [.token.string]##Z## = [.token.class-name]##Strong##&lt;double, struct ZTag>;
+
+// nest++
+using [.token.class-name]##Point## = [.token.bold]##AllOf##&lt;[.token.string]##X##, [.token.string]##Y##, [.token.string]##Z##>;
+// nest--
+----
+
+[.cue]
+****
+* So we name it AllOf
+* We describe that all of the types have to be stored or transmitted.
+****
+
 
 [.subtitle]
 == Data Schema
 
 [.cue]
 ****
-Where did I hear that before?
+Let's call this a data schema.
+
+That's nothing new…
 ****
 
-== Examples
+== Existing Data Schemas
 
 [%build]
 * XML schema
@@ -429,6 +512,61 @@ These are essential part of a distributed system.
 * We can derive how to store our data
 * And we can derive how to communicate
 ****
+
+
+[.source]
+== !
+
+[.build]
+--
+[source%nested, cpp, subs=quotes,macros]
+----
+using [.token.class-name]##Point## = [.token.bold]##AllOf##&lt;[.token.string]##X##, [.token.string]##Y##, [.token.string]##Z##>;
+// nest++
+using [.token.class-name]##Points## = [.token.bold]##SequenceOf##&lt;[.token.class-name]##Point##>;
+// nest--
+
+// nest++
+using [.token.class-name]##Geometry## = [.token.bold]##AllOf##&lt;[.token.class-name]##Points##, [.token.class-name]##Faces##, [.token.class-name]##Shaders##>;
+// nest--
+// nest++
+using [.token.class-name]##Object## = [.token.bold]##OneOf##&lt;[.token.class-name]##Geometry##, [.token.class-name]##Light##, [.token.class-name]##Camera##>;
+// nest--
+// nest++
+using [.token.class-name]##Scene## = [.token.bold]##Hierarchy##&lt;[.token.string]##ObjectId##, [.token.class-name]##Object##>;
+// nest--
+
+// nest++
+using [.token.class-name]##Document## = [.token.bold]##AllOf##&lt;[.token.string]##Name##, [.token.class-name]##Scene##>;
+// nest--
+// nest++
+using [.token.class-name]##Documents## = [.token.bold]##EntitySet##&lt;[.token.string]##DocId##, [.token.class-name]##Document##>;
+// nest--
+----
+--
+
+== !
+
+image::DocumentsSchema/Slide1.png[role="center", width="1920"]
+== !
+
+image::DocumentsSchema/Slide2.png[role="center", width="1920"]
+== !
+
+image::DocumentsSchema/Slide3.png[role="center", width="1920"]
+== !
+
+image::DocumentsSchema/Slide4.png[role="center", width="1920"]
+== !
+
+image::DocumentsSchema/Slide5.png[role="center", width="1920"]
+== !
+
+image::DocumentsSchema/Slide6.png[role="center", width="1920"]
+== !
+
+image::DocumentsSchema/Slide7.png[role="center", width="1920"]
+
 
 == !
 
@@ -454,31 +592,31 @@ Let's start with the basics.
 How can we express our data schema in C++.
 ****
 
-[.source]
+[.source.hd]
 == !
 
 [.build]
 --
-[source%nested, cpp]
+[source%nested, cpp, subs=quotes,macros]
 ----
-// schema primitives:
+// recursive schema primitives:
 // nest++
-template<class...> struct AllOf {}; // struct
+template&lt;class...> struct [.token.black.bold]##AllOf## {};
 // nest--
 // nest++
-template<class...> struct OneOf {}; // variant
+template&lt;class...> struct [.token.black.bold]##OneOf## {};
 // nest--
 // nest++
-template<class...> struct SomeOf {}; // ???
+template&lt;class> struct [.token.black.bold]##SequenceOf## {};
 // nest--
 
 // nest++
-template<class Id, class Entity>
-struct EntitySet {};
+template&lt;class [.token.string]##Id##, class>
+struct [.token.black.bold]##EntitySet## {};
 // nest--
 // nest++
-template<class Id, class Node>
-struct OrderedTree {};
+template&lt;class [.token.string]##Id##, class>
+struct [.token.black.bold]##Hierarchy## {};
 // nest--
 ----
 --
@@ -487,599 +625,418 @@ struct OrderedTree {};
 ****
 Notice these are all empty structures.
 
-Our tree is customized to our special needs.
+Our hierarchy is customized to our special needs.
 
-Ok, simple enough let's use these types for an example:
+How do we make use of this schema if everything is just empty?
 ****
-
-[.source.s62x16]
-== !
-
-[.build]
---
-[source%nested, cpp]
-----
-// example usage:
-// nest++
-using PersonId = Strong<int, struct PersonIdTag>;
-// nest--
-// nest++
-using Name = Strong<string, struct VornameTag>;
-// nest--
-// nest++
-enum class Role { Unknown, Teacher, Student };
-// nest--
-
-// nest++
-using PersonEntity = AllOf<Name, Role>;
-// nest--
-
-// nest++
-using PersonSet = EntitySet<PersonId, PersonEntity>;
-// nest--
-----
---
-
-[.cue]
-****
-Let's store some basic person data
-
-We use concrete and unique value types to store properties.
-
-Instead of structures and containers we use our schema primitives.
-
-Let's do a sketch, how we intend to use these:
-****
-
-[.source.s62x16]
-== !
-
-[.build]
---
-[source%nested, cpp]
-----
-// nest++
-void testPersonCreate() {
-    // nest++
-    auto repo = ToRepository<PersonSet>{};
-    // nest--
-
-    // nest++
-    auto cmd = EntityCreate<PersonEntity>{ 
-        Name{"Bjarne Stroustrup"},
-        Role::Teacher };
-    // nest--
-
-    // nest++
-    to_command_processor<PersonSet>(cmd, repo);
-    // nest--
-}
-// nest--
-----
---
 
 == Type driven [.green]#Code# generation
 
 [.canvas]
 image::grandValleyCattleDrive.jpg[]
 
-== Our TODO List
-
-[%build]
-* [language-cpp]#`ToCommand<T>`#
-* [language-cpp]#`ToRepository<T>`#
-* [language-cpp]#`to_command_processor<T>`#
-* Network-Protocols, GUI, …
-
-[.cue]
-****
-* commands to manage our storage
-* repositories to store and retrieve the data
-* apply commands to repositories
-* continue to profit with networking, GUIs and much more…
-
-Ok, let's get to work:
-* First try to do some simple transport storage of data for our create command.
-****
-
-
-== Simple storage
-
-[.build]
-* [language-cpp]#`ToStorage<T>`#
-
-[.cue]
-****
-The data has to be simply be stored to not get lost.
-****
-
-[.source.s62x16]
+[.source.hd]
 == !
 
-[source, cpp]
+[source, cpp, subs=quotes,macros]
 ----
-AllOf<Ts...> -> std::tuple<ToStorage<Ts>...>
+&nbsp;
+&nbsp;
+&nbsp;
+&nbsp;
+&nbsp;
+[.token.bold]##AllOf##&lt;...>
+    -> std::tuple&lt;...>;
 ----
 
-[.source.s62x16]
+[.source.hd]
 == !
 
-[source, cpp]
+[source%nested, cpp, subs=quotes,macros]
 ----
-auto f(AllOf<Ts...>) -> std::tuple<ToStorage<Ts>...>;
+&nbsp;
+&nbsp;
+&nbsp;
+&nbsp;
+// nest++
+template&lt;class... Ts>
+// nest--
+[.token.bold]##AllOf##&lt;Ts...>
+    -> std::tuple&lt;...>;
 ----
 
-[.source.s62x16]
+[.source.hd]
 == !
 
-[.build]
---
-[source%nested, cpp]
+[source%nested, cpp, subs=quotes,macros]
 ----
+&nbsp;
+&nbsp;
+&nbsp;
+&nbsp;
+template&lt;class... Ts>
 // nest++
-template<class T>
-using Ptr = T*;
+[.token.class-name]##StorageFor##([.token.bold]##AllOf##&lt;Ts...>)
 // nest--
-
-// nest++
-template<class T>
-auto toStorage(T);
-// nest--
-
-template<class T>
-using ToStorage = decltype(toStorage(Ptr<T>{}));
-
-// nest++
-template<class... Ts>
-auto toStorage(AllOf<Ts...> *)
-    -> std::tuple<ToStorage<Ts>...>;
-// nest--
-
-// nest++
-using Test = ToStorage<AllOf<>>; // error
-// nest--
+    -> std::tuple&lt;...>;
 ----
---
 
-[.cue]
-****
-The idea: use function signatures to express type conversions recursively.
-****
-
-== The ordering problem…
-
-""
-…, unqualified name lookup takes place when the template definition is examined.
-""
-link:https://en.cppreference.com/w/cpp/language/unqualified_lookup#Template_definition[cppreference.com]
-
-[.cue]
-****
-Symbols are not looked up on instantiation but on template definition.
-
-Luckily we have ADL in C++:
-****
-
-== Read on…
-
-""
-(in other words, adding a new function declaration after template definition does not make it visible except via ADL)
-""
-link:https://en.cppreference.com/w/cpp/language/unqualified_lookup#Template_definition[cppreference.com]
-
-[.cue]
-****
-As long as arguments are in the same namespace functions are found.
-
-Yeah!
-
-How can we apply ADL? …
-****
-
-[.source.s62x16]
+[.source.hd]
 == !
 
-[.build]
---
-[source%nested, cpp]
+[source%nested, cpp, subs=quotes,macros]
 ----
-// Storage with ADL
+&nbsp;
+&nbsp;
+&nbsp;
+&nbsp;
+template&lt;class... Ts>
+[.token.class-name]##StorageFor##([.token.bold]##AllOf##&lt;Ts...>)
 // nest++
-namespace storage {
-
-// nest++
-struct ADL {};
-// nest--
-
-// nest++
-template<class T>
-using ToStorage = decltype(toStorage(ADL{}, Ptr<T>{}));
-// nest--
-
-// nest++
-template<class... Ts>
-auto toStorage(ADL, AllOf<Ts...> *)
-    -> std::tuple<ToStorage<Ts>...>;
-// nest--
-
-// nest++
-using Test = ToStorage<AllOf<>>; // Ok!
-// nest--
-
-} // namespace storage
+    -> std::tuple&lt;[.token.class-name]##StorageFor##&lt;Ts>...>;
 // nest--
 ----
---
 
-[.cue]
-****
-We add a namespace around everything.
-
-* The ADL wrapper ensures everything in that namespace is found.
-* ToStorage now can use an unknown function.
-
-Let's fill in the remaining concepts:
-****
-
-[.source.s62x16]
+[.source.hd]
 == !
 
-[.build]
---
-[source%nested, cpp]
+[source%nested, cpp, subs=quotes,macros]
 ----
-AllOf<Ts...> 
-        -> std::tuple<ToStorage<Ts>...>
-
 // nest++
-OneOf<Ts...>
+template&lt;class [.token.black]##T##>
+using [.token.class-name]##StorageFor## =
+    decltype(storageFor([.token.constant]##adl##, [.token.constant]##ptr##&lt;T>));
 // nest--
+&nbsp;
+template&lt;class... Ts>
 // nest++
-        -> std::variant<ToStorage<Ts>...>
+auto storageFor([.token.class-name]##ADL##, [.token.bold]##AllOf##&lt;Ts...> *)
 // nest--
-
-// nest++
-EntitySet<Id, Data>
-// nest--
-// nest++
-        -> std::vector<std::tuple<Id, ToStorage<Data>>>
-// nest--
+    -> std::tuple&lt;[.token.class-name]##StorageFor##&lt;Ts>...>;
 ----
---
+
 
 [.cue]
 ****
-AllOf means all the given types are stored
-std::tuple seems perfect for this job.
-For every type we derive the storage type recursively.
+We introduce a using retrieve the result type of our function.
 
-OneOf wants us to store exactly one of the types
-std::variant seems to be made for this
+To make this recursion work, we need ADL.
 
-EntitySet stores any amount of entities indexed by id.
-A vector storing a tuple does this job quite well.
+Normally a templated function only sees what was defined before the function.
+ADL overrides this and adds everything of our namespace anyways.
 
-So you see the pattern for schema concepts?
+* adl is a constexpr instance of ADL.
+* ptr<T> is a constexpr nullptr to T.
 
-Now we also need to handle our value types.
+This ensures the compiler wont instantiate any complex types.
+
+Our functon signature changed accordingly.
 ****
 
-[.source.s62x16]
+== Let us generate everything!
+
+
 == !
 
-[.build]
---
-[source%nested, cpp]
-----
-// storage for values
-// nest++
-template<class T>
-constexpr bool is_value = []{
-// nest++
-    if constexpr (std::is_class_v<T>) 
-        return !std::is_empty_v<T>;
-// nest--
-// nest++
-    else
-        return std::is_enum_v<T>;
-// nest--
-}();
-// nest--
 
-template<class T>
-auto toStorage(ADL, T *)
-    -> std::enable_if_t<is_value<T>, T>;
-----
---
+++++
+<!-- for editing help:
+ * https://editor.method.ac
+ * https://svg-edit.github.io/svgedit/releases/latest/editor/svg-editor.html
+-->
+<svg class="" viewBox="0 0 1280 720" width="1920" height="1080">
 
-[.cue]
-****
-First we have to distinguish our value types from the schema types.
+    <g class="clientMonitor" transform="translate(350,180) scale(1.5)">
+        <g class="">
+            <path class="UserScreen" style="filter:url(#dropshadow)" 
+                fill="#fff8dc" stroke="#222" stroke-width="1.33"
+                d="M-100,-60 h200 v120 h-200 z
+                m4,6 v108 h192 v-108 z
+                M-110,80 h5 
+                    v-3 h12 v3 h3 
+                    v-3 h7 v3 h3 
+                    v-3 h7 v3 h3 
+                    v-3 h7 v3 h3 
+                    v-3 h7 v3 h3 
+                    v-3 h7 v3 h3 
+                    v-3 h7 v3 h3 
+                    v-3 h7 v3 h3 
+                    v-3 h7 v3 h3 
+                    v-3 h7 v3 h3 
+                    v-3 h7 v3 h3 
+                    v-3 h7 v3 h3 
+                    v-3 h12 v3 
+                    h5 v5 H-110 z
+                M60,70 h30 v30 c0,7 -7,15 -15,15 c-8,0 -15,-8 -15,-15 z m15,0 v15"/>
 
-A class or struct is used for strong types. 
-But those are unlike our schema primitives not empty.
-We also use enums direcly as property types.
-Everything else is not consided value type here.
+            <path class="UserScreenContent"
+                fill="#222" d="M-100,-60 m4,6 v108 h192 v-108 z"/>
+        </g>
 
-All value types can basically store themselfs.
+        <path class="UserSmiley"
+            fill="#ddc" stroke="#222" stroke-width="0.66"
+            d="M0,-20 a20,20 0,0,0, 0,40 a20,20 0,0,0, 0,-40z 
+                m-15,25 a16,10 0,0,0, 30,0
+                m-7,-13 a3,3 0,1,0, 1,0 z
+                m-16,0 a3,3 0,1,0, 1,0 z
+                m8,-7 l8,-10 m-9,10 l2,-9"
+            transform="translate(-110,-60) scale(2)" />
 
-The only concept missing now is our tree:
-****
+        <g class="">
+            <path class="ActionButton"
+                fill="#acf" stroke="#fff" stroke-width="2"
+                d="M-85,-22
+                    a6,6 0,0,1 6,-6 h160 
+                    a6,6 0,0,1 6,6 v40
+                    a6,6 0,0,1 -6,6 h-160
+                    a6,6 0,0,1 -6,-6 z" />
+            <text class="ActionText" x="0" y="0">Action</text>
+            <path class="MouseCursor"
+                fill="#fff" stroke="#222"
+                d="M0,0 l10,17 l-7,-2 l3,10 h-12 l3,-10 l-7,2 z"
+                transform="translate(45,5) rotate(-40) scale(2)" />
+        </g>
+    </g>
 
+    <g class="command" transform="translate(700,140)">
+        <path class="commandArrow" style="filter:url(#dropshadow)"
+            fill="#fca" stroke="#222" stroke-width="2"
+            d="M-150,0
+                c-1,-1.66 -.66,-5 1,-6
+                c30,-20 145,-60 200,-50
+                c2.5,.5 5,-2.5 5,-5 v-30
+                c0,-5 3,-8 15,0 l120,80
+                c3,2 3,6 0,8 l-120,80
+                c-12,8 -15,5 -15,0 v-30
+                c0,-2.5 -1,-5 -4.5,-6
+                c-53,-7 -120,20 -150,40
+                c-1.66,1 -4,.33 -5,-1.33 z"
+            transform="rotate(8)" />
+        <text class="commandText" x="0" y="0">Command</text>
+    </g>
 
-== Commands
+    <g class="server" transform="translate(1050,150)">
+        <path class="ServerBox" style="filter:url(#dropshadow)"
+            fill="#fff8dc" stroke="#222" stroke-width="1"
+            d="M-65,-25 h130 v100 h-130 z
+                l15,-15 h130 v100 l-15,15
+                m0,-100 l15,-15"
+            transform="scale(2)" />
 
-[.build]
-* [.green]#✔# [language-cpp]#`ToStorage<T>`#
-* [language-cpp]#`ToCommand<T>`#
+        <path class="ServerFilter"
+            fill="#acf" stroke="#222" stroke-width="2"
+            d="M-30,-30
+                a30,10 0,0,1 60,0 v10 l-25,25 v30 l-10,-10 v-20 l-25,-25 z
+                m5,0 a25,6 0,0,0 50,0 a25,6 0,0,0 -50,0"
+            transform="translate(-60,80)" />
 
-[.cue]
-****
-Commands are applied to Repositories to change the current state.
+        <path class="ServerStorage"
+            fill="#acf" stroke="#222" stroke-width="2"
+            d="M-30,-30 
+                a30,10 0,0,1 60,0 v60 
+                a30,10 0,0,1 -60,0 z
+               m60,0 a30,10 0,0,1 -60,0
+               m60,15 a30,10 0,0,1 -60,0
+               m60,15 a30,10 0,0,1 -60,0
+               m60,15 a30,10 0,0,1 -60,0"
+            transform="translate(60,80)" />
 
-We apply the same pattern as for storage.
-The ADL boilerplate is left out of the slides.
+        <text class="ServerText" x="0" y="0">Server</text>
+    </g>
 
-Lets start with the EntitySet:
-****
+    <g class="events" transform="translate(1100, 450)">
+        <path class="commandArrow" style="filter:url(#dropshadow)"
+            fill="#fca" stroke="#222" stroke-width="2"
+            d="M-150,0
+                c-1,-1.66 -.66,-5 1,-6
+                c30,-20 145,-60 200,-50
+                c2.5,.5 5,-2.5 5,-5 v-30
+                c0,-5 3,-8 15,0 l120,80
+                c3,2 3,6 0,8 l-120,80
+                c-12,8 -15,5 -15,0 v-30
+                c0,-2.5 -1,-5 -4.5,-6
+                c-53,-7 -120,20 -150,40
+                c-1.66,1 -4,.33 -5,-1.33 z"
+            transform="rotate(140)" />
+        
+        <text class="commandText" x="-50" y="40">Events</text>
+    </g>
 
-[.source.s62x16]
+    <g class="compute" transform="translate(825, 575)">
+        <path class="ComputeBox" style="filter:url(#dropshadow)"
+            fill="#fff8dc" stroke="#222" stroke-width="2"
+            d="M-120,-80 h240 v160 h-240 z" />
+        <path class="ComputeSum"
+            fill="#acf" stroke="#222" stroke-width="3"
+            d="M-55,-65
+                h100 l10,40 h-7 l-3,-5 c-8,-14 -10,-20 -32,-20 h-50
+                l45,45 l-40,40
+                h45 c12,0 24,-4 32,-20 l3,-5 h7 l-12,50 h-98
+                v-15 l40,-40 l-40,-40 z"
+            transform="scale(0.66) translate(0,30)" />
+        
+        <text class="ViewText" x="0" y="-50">Computations</text>
+    </g>
+
+    <g class="updates" transform="translate(530, 500)">
+        <path class="commandArrow" style="filter:url(#dropshadow)" 
+            fill="#fca" stroke="#222" stroke-width="2"
+            d="M-150,0
+                c-1,-1.66 -.66,-5 1,-6
+                c30,-20 145,-60 200,-50
+                c2.5,.5 5,-2.5 5,-5 v-30
+                c0,-5 3,-8 15,0 l120,80
+                c3,2 3,6 0,8 l-120,80
+                c-12,8 -15,5 -15,0 v-30
+                c0,-2.5 -1,-5 -4.5,-6
+                c-53,-7 -120,20 -150,40
+                c-1.66,1 -4,.33 -5,-1.33 z"
+            transform="scale(-1,1) rotate(0)" />
+        
+        <text class="commandText" x="-20" y="0">Updates</text>
+    </g>
+
+    <g class="views" transform="translate(170, 550) scale(1.5)">
+        <path class="ViewScreen" style="filter:url(#dropshadow)"
+            fill="#fff8dc" stroke="#222" stroke-width="1.33"
+            d="M-100,-60 h200 v120 h-200 z
+               m4,6 v108 h192 v-108 z
+               M-5,60 v10 h-20 v5 h50 v-5 h-20 v-10 z"/>
+
+        <path class="ViewScreenContent"
+            fill="#222" d="M-100,-60 m4,6 v108 h192 v-108 z"/>
+
+        <path class="ViewTree"
+            fill="#222" stroke="#fff" stroke-width="2.5"
+            d="M-50,-50
+                m3,0 h10 a3,3 0,0,1 3,3 v10 a3,3 0,0,1 -3,3 h-10 a3,3 0,0,1 -3,-3 v-10 a3,3 0,0,1 3,-3 z
+                m0,8 h10
+                m10,-6 h60 v12 h-60 z
+               M-42,-30 v12 m0,5 v12 m0,5 v12 m0,5 v8 h10
+                m5,-8 h10 a3,3 0,0,1 3,3 v10 a3,3 0,0,1 -3,3 h-10 a3,3 0,0,1 -3,-3 v-10 a3,3 0,0,1 3,-3 z
+                m0,8 h10 m-5,-5 v10
+                m15,-11 h35 v12 h-35 z
+               M-42,-24 h10
+                m5,-8 h10 a3,3 0,0,1 3,3 v10 a3,3 0,0,1 -3,3 h-10 a3,3 0,0,1 -3,-3 v-10 a3,3 0,0,1 3,-3 z
+                m0,8 h10
+                m10,-6 h30 v12 h-30 z
+               M-22,-12 v12 m0,5 v7 h10
+                m5,-6 h25 v12 h-25 z
+               M-22,-6 h10
+                m5,-6 h40 v12 h-40 z"
+            transform="translate(-40,5) scale(0.9)" />
+
+        <path class="ViewGraph"
+            fill="#222" stroke="#fff" stroke-width="2.5"
+            d="M-40,40 v-50 h20 v50 z
+               m25,0 v-70 h20 v70 z
+               m25,0 v-60 h20 v60 z"
+            transform="translate(50,0)" />
+        
+        <text class="ViewText" x="0" y="-90">Views</text>
+    </g>
+
+    <g class="schema build" transform="translate(700, 360) scale(2)">
+        <path class="Oval" style="filter:url(#dropshadow)"
+            fill="#fff" stroke="#222" stroke-width="1.33"
+            d="M0,-40 m0,10 a100,30 0,0,1 100,30 a100,30 0,0,1 -100,30 a100,30 0,0,1 -100,-30 a100,30 0,0,1 100,-30 m0,70" />
+        <!--<ellipse style="filter:url(#dropshadow)"
+            fill="#fff" stroke="#222" stroke-width="1.5" 
+            cx="0" cy="0" rx="100" ry="30"/>-->
+        
+        <text class="ViewText" font-weight="bold"
+            x="0" y="3">Schema</text>
+    </g>
+    <g class="build" transform="translate(820, 170) scale(4)">
+        <text class="ViewText"
+            fill="#729C62" stroke="#222" stroke-width="1">✔</text>
+    </g>
+    <g class="build" transform="translate(1005, 250) scale(3)">
+        <text class="ViewText"
+            fill="#729C62" stroke="#222" stroke-width="1">✔</text>
+    </g>
+    <g class="build" transform="translate(1115, 250) scale(3)">
+        <text class="ViewText"
+            fill="#729C62" stroke="#222" stroke-width="1">✔</text>
+    </g>
+    <g class="build" transform="translate(1150, 420) scale(4)">
+        <text class="ViewText"
+            fill="#729C62" stroke="#222" stroke-width="1">✔</text>
+    </g>
+    <g class="build" transform="translate(870, 615) scale(3)">
+        <text class="ViewText"
+            fill="#729C62" stroke="#222" stroke-width="1">✔</text>
+    </g>
+    <g class="build" transform="translate(630, 520) scale(4)">
+        <text class="ViewText"
+            fill="#729C62" stroke="#222" stroke-width="1">✔</text>
+    </g>
+    <g class="build" transform="translate(290, 430) scale(4)">
+        <text class="ViewText"
+            fill="#729C62" stroke="#222" stroke-width="1">?</text>
+    </g>
+
+</svg> 
+++++
+
+////
+[%build.hd]
+* [language-cpp]#`[.token.class-name]##CommandFor##<T>`#
+* [language-cpp]#`[.token.class-name]##ComamndValidatorFor##<T>`#
+* [language-cpp]#`[.token.class-name]##RepositoryFor##<T>`#
+* [language-cpp]#`[.token.class-name]##EventFor##<T>`#
+* [language-cpp]#`[.token.class-name]##ComputeFor##<T>`#
+* [language-cpp]#`[.token.class-name]##ViewModelFor##<T>`#
+////
+
+[.subtitle]
+== ViewModels
+
+[.source.hd]
 == !
 
-[.build]
---
-[source%nested, cpp]
+[source%nested, cpp, subs=quotes,macros]
 ----
 // nest++
-template<class Entity>
-using EntityCreate = ToStorage<Entity>;
-// nest--
-// nest++
-template<class Id, class Entity>
-using EntityUpdate = std::tuple<Id, ToCommand<Entity>>;
-// nest--
-// nest++
-template<class Id>
-using EntityDestroy = Id;
+template&lt;class [.token.black]##T##>
+using [.token.class-name]##ViewModelFor## = decltype(
+        viewModelFor([.token.constant]##adl##, [.token.constant]##ptr##&lt;T>));
 // nest--
 
-template<class Id, class Entity>
-auto toCommand(ADL, EntitySet<Id, Entity> *)
 // nest++
-    -> std::variant<
-      // nest++
-        EntityCreate<Entity>,
-      // nest--
-      // nest++
-        EntityUpdate<Id, Entity>,
-      // nest--
-      // nest++
-        EntityDestroy<Id>>;
-      // nest--
+template&lt;class... Ts>
+auto viewModelFor([.token.class-name]##ADL##, [.token.bold]##AllOf##&lt;Ts...> *)
+    -> [.token.class-name]##AllOfView##&lt;Ts...>;
 // nest--
 ----
---
 
-[.cue]
-****
-What kind of commands to we need?
-
-* Create uses our storage
-* Destroy just refers to the item to destroy
-* Update identifies one Entity and stores a command on them.
-
-Only Update is recursive!
-
-Simple enough - next up: Tree commands
-****
-
-== Repository
-
-[.build]
-* [.green]#✔# [language-cpp]#`ToStorage<T>`#
-* [.green]#✔# [language-cpp]#`ToCommand<T>`#
-* [language-cpp]#`ToRepository<T>`#
-
-[.cue]
-****
-Now we have the commands, now we need repositories.
-****
-
-[.source.s62x16]
+[.source.hd]
 == !
 
-[.build]
---
-[source%nested, cpp]
+[source%nested, cpp, subs=quotes,macros]
 ----
-template<class Id, class Entity>
-auto toRepository(ADL, EntitySet<Id, Entity> *)
-// nest++
-    -> std::map<Id, ToRepository<Entity>>;
-// nest--
-----
---
+nest++
+template&lt;class... Ts>
+class AllOfView : public [.token.class-name]##QObject## {
+nest--
 
-[.cue]
-****
-This is enough.
 
-But I recommend to build testable classes for this.
-****
 
-[.source.s62x16]
-== !
 
-[.build]
---
-[source%nested, cpp]
-----
-template<class Id, class EntityRepo>
-class EntitySetRepository {
-    std::map<Id, EntityRepo> m;
 
-public:
-    // nest++
-    auto operator[] (Id) -> EntityRepo&;
-    // nest--
-    // nest++
-    auto createId() -> Id;
-    // nest--
-    // nest++
-    void destroy(Id);
-    // nest--
+
 };
-
-// nest++
-template<class Id, class Entity>
-auto toRepository(ADL, EntitySet<Id, Entity> *)
-// nest--
-// nest++
-    -> EntitySetRepository<Id, ToRepository<Entity>>;
-// nest--
 ----
---
 
-[.cue]
-****
-You see the commands that are available as member functions.
-****
-
-== Processing Commands
-
-[.build]
-* [.green]#✔# [language-cpp]#`ToStorage<T>`#
-* [.green]#✔# [language-cpp]#`ToCommand<T>`#
-* [.green]#✔# [language-cpp]#`ToRepository<T>`#
-* [language-cpp]#`to_command_processor<T>`#
-
-[.cue]
-****
-Now we are ready to apply commands to repositories.
-****
-
-== !
-
-Command ∘ Repository -> Updated Repository
-
-[.cue]
-****
-The repositories already implement all the functionality.
-We just have to connect it to the schema.
-
-This time we generate functionality instead of types.
-To keep the same pattern, we use lambdas for that:
-****
-
-[.source.s62x16]
-== !
-
-[.build]
---
-[source%nested, cpp]
-----
-// Processor boilerplate
-namespace processor {
-
-// nest++
-struct ADL {};
-// nest--
-
-// nest++
-template<class T>
-constexpr auto to_command_processor = 
-    toCommandProcessor(ADL{}, Ptr<T>{});
-// nest--
-
-} // namespace processor
-----
---
-
-[.cue]
-****
-We still use an ADL wrapper.
-
-toCommandProcessor returns a lambda.
-The lambda expects a command and a mutable repository reference
-
-Until C++20 Lambdas cannot be instantiated, so we use a constexpr constant.
-
-Let's look at the implementation for EntitySet
-****
-
-[.source.s77x19]
-== !
-
-[.build]
---
-[source%nested, cpp]
-----
-template<class Id, class Entity>
-constexpr auto toCommandProcessor(ADL, EntitySet<Id, Entity> *) {
-    // nest++
-    using T = EntitySet<Id, Entity>;
-    return [](const ToCommand<T>& cmd, ToRepository<T>& repo) {
-        // nest++
-        oneVisit(cmd,
-            // nest++
-            [&](const EntityCreate<Entity>& create) {
-                repo[repo.createId()] = create;
-            },
-            // nest--
-            // nest++
-            [&](const EntityUpdate<Id, Entity>& update) {
-                auto [id, entityCmd] = update;
-                to_command_processor<Entity>(entityCmd, repo[id]);
-            },
-            // nest--
-            // nest++
-            [&](const EntityDestroy<Id>& id) {
-                repo.destroy(id);
-            });
-            // nest--
-       // nest--
-    };
-    // nest--
-}
-----
---
-
-[.cue]
-****
-We create a lambda with the expected signature.
-Depending on the actual command we call the repository function.
-****
-
-== Current Scores
+== Woboq Verdigris
 
 [%build]
-* [.green]#✔# [language-cpp]#`ToStorage<T>`#
-* [.green]#✔# [language-cpp]#`ToCommand<T>`#
-* [.green]#✔# [language-cpp]#`ToRepository<T>`#
-* [.green]#✔# [language-cpp]#`to_command_processor<T>`#
+* Plug in replacement for Qt moc
+* Allows templated `[.token.class-name]##QObject##`
+* link:https://github.com/woboq/verdigris[github.com/woboq/verdigris]
+* PR#69 adds "ConstExpr C++ API"
 
-== What now?
-
-[%build]
-* Network-Protocols
-* Computations
-* GUI
-
-[.cue]
-****
-Protocols - work just as seen before.
-Computations - basically compute new values from existing data.
-
-Let's look deeper into GUIs with Qt.
-****
-
-
-== Qt - Gui
-
-[%build]
-* Qt moc - Meta Object Compiler
-* link:https://github.com/woboq/verdigris/issues[Woboq Verdigris]
-* … with new APIs
+&nbsp;
 
 [.cue]
 ****
@@ -1089,82 +1046,337 @@ Verdigris from Woboq is a huge win.
 ****
 
 
-[.source.s77x19]
+[.source.hd]
 == !
 
-[.build]
---
-[source%nested, cpp]
+[source%nested, cpp, subs=quotes,macros]
 ----
-// nest++
-// nest++
-template<class... Ts>
-class AllOfView : public QObject {
+template&lt;class... Ts>
+class AllOfView : public [.token.class-name]##QObject## {
   // nest++
   W_OBJECT(AllOfView)
   // nest--
 
-
 };
-// nest--
 
 // nest++
-W_OBJECT_IMPL((AllOfView<Ts...>), template<class... Ts>)
-// nest--
-
-template<class... Ts>
-auto toViewModel(ADL, AllOf<Ts...> *) -> AllOfView<Ts...>;
+W_OBJECT_IMPL([.token.class-name]##AllOfView##&lt;Ts...>,
+              template&lt;class... Ts>)
 // nest--
 ----
---
 
+[.cue]
+****
+W_OBJECT instead of Q_Object macro.
+W_OBJECT_IMPL generates all the code moc would generate.
+****
 
-[.source.s77x19]
+[.source.hd.s77x19]
 == !
-
 
 [.build]
 --
-[source%nested, cpp]
+[source%nested, cpp, subs=quotes,macros]
 ----
-template<class... Ts>
-class AllOfView : public QObject {
-  W_OBJECT(AllOfView)
+template&lt;class... Ts>
+class AllOfView : public [.token.class-name]##QObject## {
 
   // nest++
+  template&lt;[.token.keyword]##size_t## I,
   // nest++
-  template<size_t I, class = std::enable_if_t<(I < sizeof...(Ts))>>
+           class = std::enable_if_t&lt;(I &lt; sizeof...(Ts))>>
+  // nest--
   struct RegisterProperties {
-    constexpr static auto property = 
+    // nest++
+    constexpr static auto [.token.constant]##property## = 
+    // nest--
       // nest++
-      w_cpp::makeProperty<QVariant>(property_name<I>, qvariant_name)
+      w_cpp::[.token.function]##makeProperty##&lt;[.token.class-name]##QVariant##>(
+          [.token.constant]##property_name##&lt;I>, [.token.constant]##qvariant_name##)
         // nest--
         // nest++
-        .setGetter(&AllOfView::getPropertyValue<I>)
-        .setSetter(&AllOfView::setPropertyValue<I>)
-        .setNotify(&AllOfView::propertyChanged<I>);
+        .setGetter(&[.token.class-name]##AllOfView##::[.token.function]##getPropertyValue##&lt;I>)
+        .setSetter(&[.token.class-name]##AllOfView##::[.token.function]##setPropertyValue##&lt;I>)
+        .setNotify(&[.token.class-name]##AllOfView##::[.token.function]##propertyChanged##&lt;I>);
         // nest--
   };
   // nest--
-  W_CPP_PROPERTY(RegisterProperties)
+  // nest++
+  W_CPP_PROPERTY([.token.class-name]##RegisterProperties##)
   // nest--
+
 };
 ----
 --
 
+[.cue]
+****
+To Register the properties we create a templated struct with any name.
+We limit I to the amount of properties we have with enable_it_t.
+Only the property compile time constant matters.
+We build it with a type, a name and the type name.
+We also provide how get, set and notify works for the property.
+Finally we give that struct to Verdigris.
+
+That's the pattern.
+
+****
+
+== !
 
 
+++++
+<!-- for editing help:
+ * https://editor.method.ac
+ * https://svg-edit.github.io/svgedit/releases/latest/editor/svg-editor.html
+-->
+<svg class="" viewBox="0 0 1280 720" width="1920" height="1080">
 
-== Templated QObject
+    <g class="clientMonitor" transform="translate(350,180) scale(1.5)">
+        <g class="">
+            <path class="UserScreen" style="filter:url(#dropshadow)" 
+                fill="#fff8dc" stroke="#222" stroke-width="1.33"
+                d="M-100,-60 h200 v120 h-200 z
+                m4,6 v108 h192 v-108 z
+                M-110,80 h5 
+                    v-3 h12 v3 h3 
+                    v-3 h7 v3 h3 
+                    v-3 h7 v3 h3 
+                    v-3 h7 v3 h3 
+                    v-3 h7 v3 h3 
+                    v-3 h7 v3 h3 
+                    v-3 h7 v3 h3 
+                    v-3 h7 v3 h3 
+                    v-3 h7 v3 h3 
+                    v-3 h7 v3 h3 
+                    v-3 h7 v3 h3 
+                    v-3 h7 v3 h3 
+                    v-3 h12 v3 
+                    h5 v5 H-110 z
+                M60,70 h30 v30 c0,7 -7,15 -15,15 c-8,0 -15,-8 -15,-15 z m15,0 v15"/>
 
-TODO
+            <path class="UserScreenContent"
+                fill="#222" d="M-100,-60 m4,6 v108 h192 v-108 z"/>
+        </g>
+
+        <path class="UserSmiley"
+            fill="#ddc" stroke="#222" stroke-width="0.66"
+            d="M0,-20 a20,20 0,0,0, 0,40 a20,20 0,0,0, 0,-40z 
+                m-15,25 a16,10 0,0,0, 30,0
+                m-7,-13 a3,3 0,1,0, 1,0 z
+                m-16,0 a3,3 0,1,0, 1,0 z
+                m8,-7 l8,-10 m-9,10 l2,-9"
+            transform="translate(-110,-60) scale(2)" />
+
+        <g class="">
+            <path class="ActionButton"
+                fill="#acf" stroke="#fff" stroke-width="2"
+                d="M-85,-22
+                    a6,6 0,0,1 6,-6 h160 
+                    a6,6 0,0,1 6,6 v40
+                    a6,6 0,0,1 -6,6 h-160
+                    a6,6 0,0,1 -6,-6 z" />
+            <text class="ActionText" x="0" y="0">Action</text>
+            <path class="MouseCursor"
+                fill="#fff" stroke="#222"
+                d="M0,0 l10,17 l-7,-2 l3,10 h-12 l3,-10 l-7,2 z"
+                transform="translate(45,5) rotate(-40) scale(2)" />
+        </g>
+    </g>
+
+    <g class="command" transform="translate(700,140)">
+        <path class="commandArrow" style="filter:url(#dropshadow)"
+            fill="#fca" stroke="#222" stroke-width="2"
+            d="M-150,0
+                c-1,-1.66 -.66,-5 1,-6
+                c30,-20 145,-60 200,-50
+                c2.5,.5 5,-2.5 5,-5 v-30
+                c0,-5 3,-8 15,0 l120,80
+                c3,2 3,6 0,8 l-120,80
+                c-12,8 -15,5 -15,0 v-30
+                c0,-2.5 -1,-5 -4.5,-6
+                c-53,-7 -120,20 -150,40
+                c-1.66,1 -4,.33 -5,-1.33 z"
+            transform="rotate(8)" />
+        <text class="commandText" x="0" y="0">Command</text>
+    </g>
+
+    <g class="server" transform="translate(1050,150)">
+        <path class="ServerBox" style="filter:url(#dropshadow)"
+            fill="#fff8dc" stroke="#222" stroke-width="1"
+            d="M-65,-25 h130 v100 h-130 z
+                l15,-15 h130 v100 l-15,15
+                m0,-100 l15,-15"
+            transform="scale(2)" />
+
+        <path class="ServerFilter"
+            fill="#acf" stroke="#222" stroke-width="2"
+            d="M-30,-30
+                a30,10 0,0,1 60,0 v10 l-25,25 v30 l-10,-10 v-20 l-25,-25 z
+                m5,0 a25,6 0,0,0 50,0 a25,6 0,0,0 -50,0"
+            transform="translate(-60,80)" />
+
+        <path class="ServerStorage"
+            fill="#acf" stroke="#222" stroke-width="2"
+            d="M-30,-30 
+                a30,10 0,0,1 60,0 v60 
+                a30,10 0,0,1 -60,0 z
+               m60,0 a30,10 0,0,1 -60,0
+               m60,15 a30,10 0,0,1 -60,0
+               m60,15 a30,10 0,0,1 -60,0
+               m60,15 a30,10 0,0,1 -60,0"
+            transform="translate(60,80)" />
+
+        <text class="ServerText" x="0" y="0">Server</text>
+    </g>
+
+    <g class="events" transform="translate(1100, 450)">
+        <path class="commandArrow" style="filter:url(#dropshadow)"
+            fill="#fca" stroke="#222" stroke-width="2"
+            d="M-150,0
+                c-1,-1.66 -.66,-5 1,-6
+                c30,-20 145,-60 200,-50
+                c2.5,.5 5,-2.5 5,-5 v-30
+                c0,-5 3,-8 15,0 l120,80
+                c3,2 3,6 0,8 l-120,80
+                c-12,8 -15,5 -15,0 v-30
+                c0,-2.5 -1,-5 -4.5,-6
+                c-53,-7 -120,20 -150,40
+                c-1.66,1 -4,.33 -5,-1.33 z"
+            transform="rotate(140)" />
+        
+        <text class="commandText" x="-50" y="40">Events</text>
+    </g>
+
+    <g class="compute" transform="translate(825, 575)">
+        <path class="ComputeBox" style="filter:url(#dropshadow)"
+            fill="#fff8dc" stroke="#222" stroke-width="2"
+            d="M-120,-80 h240 v160 h-240 z" />
+        <path class="ComputeSum"
+            fill="#acf" stroke="#222" stroke-width="3"
+            d="M-55,-65
+                h100 l10,40 h-7 l-3,-5 c-8,-14 -10,-20 -32,-20 h-50
+                l45,45 l-40,40
+                h45 c12,0 24,-4 32,-20 l3,-5 h7 l-12,50 h-98
+                v-15 l40,-40 l-40,-40 z"
+            transform="scale(0.66) translate(0,30)" />
+        
+        <text class="ViewText" x="0" y="-50">Computations</text>
+    </g>
+
+    <g class="updates" transform="translate(530, 500)">
+        <path class="commandArrow" style="filter:url(#dropshadow)" 
+            fill="#fca" stroke="#222" stroke-width="2"
+            d="M-150,0
+                c-1,-1.66 -.66,-5 1,-6
+                c30,-20 145,-60 200,-50
+                c2.5,.5 5,-2.5 5,-5 v-30
+                c0,-5 3,-8 15,0 l120,80
+                c3,2 3,6 0,8 l-120,80
+                c-12,8 -15,5 -15,0 v-30
+                c0,-2.5 -1,-5 -4.5,-6
+                c-53,-7 -120,20 -150,40
+                c-1.66,1 -4,.33 -5,-1.33 z"
+            transform="scale(-1,1) rotate(0)" />
+        
+        <text class="commandText" x="-20" y="0">Updates</text>
+    </g>
+
+    <g class="views" transform="translate(170, 550) scale(1.5)">
+        <path class="ViewScreen" style="filter:url(#dropshadow)"
+            fill="#fff8dc" stroke="#222" stroke-width="1.33"
+            d="M-100,-60 h200 v120 h-200 z
+               m4,6 v108 h192 v-108 z
+               M-5,60 v10 h-20 v5 h50 v-5 h-20 v-10 z"/>
+
+        <path class="ViewScreenContent"
+            fill="#222" d="M-100,-60 m4,6 v108 h192 v-108 z"/>
+
+        <path class="ViewTree"
+            fill="#222" stroke="#fff" stroke-width="2.5"
+            d="M-50,-50
+                m3,0 h10 a3,3 0,0,1 3,3 v10 a3,3 0,0,1 -3,3 h-10 a3,3 0,0,1 -3,-3 v-10 a3,3 0,0,1 3,-3 z
+                m0,8 h10
+                m10,-6 h60 v12 h-60 z
+               M-42,-30 v12 m0,5 v12 m0,5 v12 m0,5 v8 h10
+                m5,-8 h10 a3,3 0,0,1 3,3 v10 a3,3 0,0,1 -3,3 h-10 a3,3 0,0,1 -3,-3 v-10 a3,3 0,0,1 3,-3 z
+                m0,8 h10 m-5,-5 v10
+                m15,-11 h35 v12 h-35 z
+               M-42,-24 h10
+                m5,-8 h10 a3,3 0,0,1 3,3 v10 a3,3 0,0,1 -3,3 h-10 a3,3 0,0,1 -3,-3 v-10 a3,3 0,0,1 3,-3 z
+                m0,8 h10
+                m10,-6 h30 v12 h-30 z
+               M-22,-12 v12 m0,5 v7 h10
+                m5,-6 h25 v12 h-25 z
+               M-22,-6 h10
+                m5,-6 h40 v12 h-40 z"
+            transform="translate(-40,5) scale(0.9)" />
+
+        <path class="ViewGraph"
+            fill="#222" stroke="#fff" stroke-width="2.5"
+            d="M-40,40 v-50 h20 v50 z
+               m25,0 v-70 h20 v70 z
+               m25,0 v-60 h20 v60 z"
+            transform="translate(50,0)" />
+        
+        <text class="ViewText" x="0" y="-90">Views</text>
+    </g>
+
+    <g class="schema" transform="translate(700, 360) scale(2)">
+        <path class="Oval" style="filter:url(#dropshadow)"
+            fill="#fff" stroke="#222" stroke-width="1.33"
+            d="M0,-40 m0,10 a100,30 0,0,1 100,30 a100,30 0,0,1 -100,30 a100,30 0,0,1 -100,-30 a100,30 0,0,1 100,-30 m0,70" />
+        <!--<ellipse style="filter:url(#dropshadow)"
+            fill="#fff" stroke="#222" stroke-width="1.5" 
+            cx="0" cy="0" rx="100" ry="30"/>-->
+        
+        <text class="ViewText" font-weight="bold"
+            x="0" y="3">Schema</text>
+    </g>
+    <g class="" transform="translate(820, 170) scale(4)">
+        <text class="ViewText"
+            fill="#729C62" stroke="#222" stroke-width="1">✔</text>
+    </g>
+    <g class="" transform="translate(1005, 250) scale(3)">
+        <text class="ViewText"
+            fill="#729C62" stroke="#222" stroke-width="1">✔</text>
+    </g>
+    <g class="" transform="translate(1115, 250) scale(3)">
+        <text class="ViewText"
+            fill="#729C62" stroke="#222" stroke-width="1">✔</text>
+    </g>
+    <g class="" transform="translate(1150, 420) scale(4)">
+        <text class="ViewText"
+            fill="#729C62" stroke="#222" stroke-width="1">✔</text>
+    </g>
+    <g class="" transform="translate(870, 615) scale(3)">
+        <text class="ViewText"
+            fill="#729C62" stroke="#222" stroke-width="1">✔</text>
+    </g>
+    <g class="" transform="translate(630, 520) scale(4)">
+        <text class="ViewText"
+            fill="#729C62" stroke="#222" stroke-width="1">✔</text>
+    </g>
+    <g class="build" transform="translate(290, 430) scale(4)">
+        <text class="ViewText"
+            fill="#729C62" stroke="#222" stroke-width="1">✔</text>
+    </g>
+
+</svg> 
+++++
 
 
-== Summary
+== Recap
 
-[.build]
-* one central type driven data schema
-* guides everything else
+[%build]
+* distributed system
+* strong types
+* data schemas
+* generate code
+* build QObjects
+
+&nbsp;
+
 
 == &plus;+ Advantages &plus;+ &nbsp;
 
@@ -1181,17 +1393,12 @@ TODO
 * C++ requires some boilerplate
 * long type names
 
-== Usage Scenarios
-
-[%build]
-* long lived distributed systems
-* performance critical systems
-
 == Links
 
 [%build]
 * link:https://github.com/woboq/verdigris[github.com/woboq/verdigris]
 * link:https://github.com/basicpp17[github.com/basicpp17]
+* link:https://github.com/arBmind/2019-types-en[github.com/arBmind/2019-types-en]
 
 == !
 
@@ -1274,23 +1481,23 @@ image::rebuild_logo.png[role="pull-left", width="450"]
 
 == Opaque Strong Types
 
-[.source.s62x16]
+[.source.hd.s77x19]
 == !
 
 [.build]
 --
-[source%nested, cpp]
+[source%nested, cpp, subs=quotes,macros]
 ----
 // nest++
 // nest++
 struct PersonId;
 // nest--
 // nest++
-constexpr auto makeOpaque(Strong<int, struct PersonIdTag>)
+constexpr auto makeOpaque(Strong&lt;int, struct PersonIdTag>)
     -> PersonId;
 // nest--
 
-struct PersonId : Strong<int, struct PersonIdTag> {
+struct PersonId : Strong&lt;int, struct PersonIdTag> {
     // nest++
     using Strong::Strong;
     // nest--
@@ -1299,71 +1506,21 @@ struct PersonId : Strong<int, struct PersonIdTag> {
 ----
 --
 
-[.source.s62x16]
+[.source.hd.s77x19]
 == !
 
 [.build]
 --
 [source%nested, cpp]
 ----
-#define STRONG_OPAQUE(name, type, ...)          \
-    struct name;                                \
-    constexpr auto makeOpaqueType               \
-        (Strong<type, ##__VA_ARGS__>) -> name;  \
-    struct name : Strong<type, ##__VA_ARGS__> { \
-        using Strong::Strong;                   \
-    }
+#define STRONG_OPAQUE(name, type, ...)                   \
+  struct name;                                           \
+  constexpr auto makeOpaqueType(Strong<                  \
+      type, name##Tag, ##__VA_ARGS__>) -> name;          \
+  struct name : Strong<type, name##Tag, ##__VA_ARGS__> { \
+      using Strong::Strong;                              \
+  }
 
 STRONG_OPAQUE(PersonId, int);
-----
---
-
-== Join Type Packs
-
-[.source.s62x16]
-== !
-
-[.build]
---
-[source%nested, cpp]
-----
-template <class... As, class... Bs>
-auto join(AllOf<As...>, AllOf<Bs...>)
-    -> AllOf<As...,Bs...>;
-
-template<class A, class B>
-using Join = decltype(
-    join(std::declval<A>(), std::declval<B>())
-);
-----
---
-
-== OneVisit
-
-[.source.s62x16]
-== !
-
-[.build]
---
-[source%nested, cpp]
-----
-// nest++
-// nest++
-template<class... Fs> struct Overloaded : Fs... {
-    using Fs::operator()...;
-};
-// nest--
-// nest++
-template<class... Fs> Overloaded(Fs...) 
-    -> Overloaded<Fs...>;
-// nest--
-
-template<class V, class... Fs>
-auto oneVisit(V &&v, Fs &&... fs) {
-// nest++
-    return std::visit(Overloaded{fs...}, v);
-// nest--
-}
-// nest--
 ----
 --

@@ -1,13 +1,13 @@
 #pragma once
 #include "../strong/Strong.h"
-#include "Abstract.h"
+#include "Recursive.h"
 
 #include <string>
 
 namespace person {
 
 using std::string;
-using namespace abstract;
+using namespace recursive;
 
 // tag::persons[]
 // example usage:
@@ -23,7 +23,7 @@ using Persons = EntitySet<PersonId, PersonData>;
 // tag::introduction[]
 using Introduction = Strong<std::string, struct IntroductionTag>;
 
-auto toComputedValues(PersonData) -> AllOf<Introduction>;
+auto computedValuesFor(PersonData) -> AllOf<Introduction>;
 // end::introduction[]
 
 } // namespace person

@@ -4,31 +4,32 @@
 
 namespace processor {
 
-using namespace abstract;
-using command::ToCommand;
-using repository::ToRepository;
+using namespace recursive;
+using command::CommandFor;
+using repository::RepositoryFor;
 using storage::is_value;
-using storage::ToStorage;
+using storage::StorageFor;
 
 // tag::boilerplate[]
 struct ADL {};
+constexpr auto adl = ADL{};
 
 template<class T>
-constexpr auto to_command_processor = toCommandProcessor(ADL{}, Ptr<T>{});
+constexpr auto command_processor_for = commandProcessorFor(adl, ptr<T>);
 // end::boilerplate[]
 
 template<class... Ts>
-constexpr auto toCommandProcessor(ADL, AllOf<Ts...> *) {
-    return [](const ToCommand<AllOf<Ts...>> &cmd, ToRepository<AllOf<Ts...>> &repo) {
-        return (to_command_processor<Ts>(std::get<ToCommand<Ts>>(cmd),
-                                         std::get<ToRepository<Ts>>(repo)),
+constexpr auto commandProcessorFor(ADL, AllOf<Ts...> *) {
+    return [](const CommandFor<AllOf<Ts...>> &cmd, RepositoryFor<AllOf<Ts...>> &repo) {
+        return (command_processor_for<Ts>(std::get<CommandFor<Ts>>(cmd),
+                                          std::get<RepositoryFor<Ts>>(repo)),
                 ...);
     };
 }
 
 template<class T, std::enable_if_t<is_value<T>, void *> = nullptr>
-constexpr auto toCommandProcessor(ADL, T *) {
-    return [](const ToCommand<T> &cmd, ToRepository<T> &repo) {
+constexpr auto commandProcessorFor(ADL, T *) {
+    return [](const CommandFor<T> &cmd, RepositoryFor<T> &repo) {
         if (cmd) repo = *cmd;
     };
 }
@@ -45,19 +46,19 @@ auto oneVisit(V &&v, Fs &&... fs) {
 
 // tag::entitySet[]
 template<class Id, class Entity>
-constexpr auto toCommandProcessor(ADL, EntitySet<Id, Entity> *) {
+constexpr auto commandProcessorFor(ADL, EntitySet<Id, Entity> *) {
     using T = EntitySet<Id, Entity>;
-    return [](const ToCommand<T> &cmd, ToRepository<T> &repo) {
+    return [](const CommandFor<T> &cmd, RepositoryFor<T> &repo) {
         oneVisit(
             cmd,
             [&repo](const command::EntityCreate<Entity> &storage) {
                 repo[repo.createId()] = storage;
                 // hint: to allow nesting you will need a storage processor
-                // to_storage_processor<Data>(storage, repo[repo.createId()]);
+                // command_processor_for<Data>(storage, repo[repo.createId()]);
             },
             [&repo](const command::EntityUpdate<Id, Entity> &update) {
                 auto [id, dataCmd] = update;
-                to_command_processor<Entity>(dataCmd, repo[id]);
+                command_processor_for<Entity>(dataCmd, repo[id]);
             },
             [&repo](const command::EntityDestroy<Id> &destroy) {
                 repo.destroy(destroy); //

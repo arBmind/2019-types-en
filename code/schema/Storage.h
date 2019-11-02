@@ -1,6 +1,6 @@
 #pragma once
 #include "../strong/Strong.h"
-#include "Abstract.h"
+#include "Recursive.h"
 
 #include <tuple>
 #include <variant>
@@ -9,22 +9,23 @@
 // Storage ADL Boilerplate
 namespace storage {
 
-using namespace abstract;
+using namespace recursive;
 
 struct ADL {};
+constexpr auto adl = ADL{};
 
 template<class T>
-using ToStorage = decltype(toStorage(ADL{}, Ptr<T>{}));
+using StorageFor = decltype(storageFor(adl, ptr<T>));
 
 // tag::abstracts[]
 template<class... Ts>
-auto toStorage(ADL, AllOf<Ts...> *) -> std::tuple<ToStorage<Ts>...>;
+auto storageFor(ADL, AllOf<Ts...> *) -> std::tuple<StorageFor<Ts>...>;
 
 template<class... Ts>
-auto toStorage(ADL, OneOf<Ts...> *) -> std::variant<ToStorage<Ts>...>;
+auto storageFor(ADL, OneOf<Ts...> *) -> std::variant<StorageFor<Ts>...>;
 
 template<class Id, class Entity>
-auto toStorage(ADL, EntitySet<Id, Entity> *) -> std::vector<std::tuple<Id, ToStorage<Entity>>>;
+auto storageFor(ADL, EntitySet<Id, Entity> *) -> std::vector<std::tuple<Id, StorageFor<Entity>>>;
 // end::abstracts[]
 
 // tag::values[]
@@ -38,7 +39,7 @@ constexpr bool is_value = [] {
 }();
 
 template<class T>
-auto toStorage(ADL, T *) -> std::enable_if_t<is_value<T>, T>;
+auto storageFor(ADL, T *) -> std::enable_if_t<is_value<T>, T>;
 // end::values[]
 // end::abstracts[]
 

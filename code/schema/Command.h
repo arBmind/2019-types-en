@@ -1,6 +1,6 @@
 #pragma once
 #include "../strong/Strong.h"
-#include "Abstract.h"
+#include "Recursive.h"
 #include "Storage.h"
 
 #include <optional>
@@ -10,30 +10,31 @@
 
 namespace command {
 
-using namespace abstract;
+using namespace recursive;
 using storage::is_value;
-using storage::ToStorage;
+using storage::StorageFor;
 
 struct ADL {};
+constexpr auto adl = ADL{};
 
 template<class T>
-using ToCommand = decltype(toCommand(ADL{}, Ptr<T>{}));
+using CommandFor = decltype(commandFor(adl, ptr<T>));
 
 template<class... Ts>
-auto toCommand(ADL, AllOf<Ts...> *) -> std::tuple<ToCommand<Ts>...>;
+auto commandFor(ADL, AllOf<Ts...> *) -> std::tuple<CommandFor<Ts>...>;
 
 template<class T>
-auto toCommand(ADL, T *) -> std::enable_if_t<is_value<T>, std::optional<T>>;
+auto commandFor(ADL, T *) -> std::enable_if_t<is_value<T>, std::optional<T>>;
 
 template<class Entity>
-using EntityCreate = ToStorage<Entity>;
+using EntityCreate = StorageFor<Entity>;
 template<class Id>
 using EntityDestroy = Id;
 template<class Id, class Entity>
-using EntityUpdate = std::tuple<Id, ToCommand<Entity>>;
+using EntityUpdate = std::tuple<Id, CommandFor<Entity>>;
 
 template<class Id, class Entity>
-auto toCommand(ADL, EntitySet<Id, Entity> *)
+auto commandFor(ADL, EntitySet<Id, Entity> *)
     -> std::variant<EntityCreate<Entity>, EntityDestroy<Id>, EntityUpdate<Id, Entity>>;
 
 } // namespace command

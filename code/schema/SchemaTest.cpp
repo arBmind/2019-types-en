@@ -10,13 +10,13 @@
 using namespace person;
 
 using command::EntityCreate;
-using command::ToCommand;
-using processor::to_command_processor;
-using repository::ToRepository;
+using command::CommandFor;
+using processor::command_processor_for;
+using repository::RepositoryFor;
 
-using Command = ToCommand<Persons>;
-using Repository = ToRepository<Persons>;
-constexpr auto processCommand = to_command_processor<Persons>;
+using Command = CommandFor<Persons>;
+using Repository = RepositoryFor<Persons>;
+constexpr auto processCommand = command_processor_for<Persons>;
 
 // nest++
 void testCreate() {
@@ -28,8 +28,8 @@ void testCreate() {
     std::cout << std::get<Name>(repo[PersonId{1}]).v << "\n";
 }
 
-using compute::ToComputed;
-using OutPersons = ToComputed<Persons>;
+using compute::ComputedFor;
+using OutPersons = ComputedFor<Persons>;
 
 void testCompute() {
     using CreateCmd = EntityCreate<PersonData>;
@@ -39,10 +39,10 @@ void testCompute() {
 
     std::cout << output.v << "\n";
 
-    using OutCommand = ToCommand<OutPersons>;
-    using OutCreateCommand = EntityCreate<ToComputed<PersonData>>;
-    using OutRepository = ToRepository<OutPersons>;
-    constexpr auto processOutCommand = processor::to_command_processor<OutPersons>;
+    using OutCommand = CommandFor<OutPersons>;
+    using OutCreateCommand = EntityCreate<ComputedFor<PersonData>>;
+    using OutRepository = RepositoryFor<OutPersons>;
+    constexpr auto processOutCommand = processor::command_processor_for<OutPersons>;
 
     OutCommand outCmd1 = OutCreateCommand{
         std::get<Name>(input), //
