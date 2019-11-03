@@ -298,20 +298,19 @@ Why strong types?
 [.source.hd]
 == !
 
-[source, cpp, subs=quotes,macros]
-----
+```cpp
 struct Point {
     double x;
     double y;
     double z;
 };
-----
+```
 
 [.source.hd]
 == !
 
-[source%nested, cpp]
-----
+[%nested]
+```cpp
 struct Point {
     double x;
     double y;
@@ -320,13 +319,13 @@ struct Point {
     double weight;
     // nest--
 };
-----
+```
 
 [.source.hd]
 == !
 
-[source%nested, cpp]
-----
+[%nested]
+```cpp
 struct Point {
     double x;
     double y;
@@ -337,15 +336,15 @@ struct Point {
     double texY;
     // nest--
 };
-----
+```
 
-[.source.hd]
+[.source.hd.build]
 == !
 
-[.build]
---
-[source%nested, cpp, subs=quotes,macros]
-----
+:type: .token.class-name
+
+[%nested, subs="verbatim,quotes"]
+```cpp
 struct X { double v{}; };
 // nest++
 struct Y { double v{}; };
@@ -354,47 +353,41 @@ struct Z { double v{}; };
 
 // nest++
 struct Point {
-    [.token.class-name]##X## x;
-    [.token.class-name]##Y## y;
-    [.token.class-name]##Z## z;
+    [.token.type]#X# x;
+    [.token.type]#Y# y;
+    [{type}]#Z# z;
 };
 // nest--
-----
---
-
+```
 
 [.source.hd]
 == !
 
-[source%nested, cpp, subs=quotes,macros]
-----
+[%nested, subs="verbatim,quotes"]
+```cpp
 struct X { double v{}; };
 struct Y { double v{}; };
 struct Z { double v{}; };
 
 // nest++
-using [.token.class-name]##Point## = std::tuple&lt;[.token.class-name]##X##, [.token.class-name]##Y##, [.token.class-name]##Z##>;
+using [{type}]#Point# = std::tuple<[{type}]##X##, [.token.type]#Y#, [{type}]#Z#>;
 // nest--
-----
+```
 
-
-[.source]
+[.source.build]
 == !
 
-[.build]
---
-[source%nested, cpp, subs=quotes,macros]
-----
+[%nested, subs="verbatim,quotes"]
+```cpp
 // nest++
-template&lt;class V, class /\*Tag*/ >
+template<class V, class /\*Tag*/ >
 // nest--
 struct Strong {
     // nest++
-    [.token.class-name]##V## v{};
+    [.token.type]##V## v{};
     // nest--
 };
-----
---
+```
 
 [.cue]
 ****
@@ -422,29 +415,25 @@ If you want to stick to standard take a look at <chronos>.
 ****
 
 
-[.source.hd]
+[.source.hd.build]
 == !
 
-[.build]
---
-[source%nested, cpp, subs=quotes,macros]
-----
-using [.token.string]##X## = [.token.class-name]##Strong##&lt;double, struct XTag>;
+[%nested, subs="verbatim,quotes"]
+```cpp
+using _X_ = [.token.type]#Strong#<double, struct XTag>;
 // nest++
-using [.token.string]##Y## = [.token.class-name]##Strong##&lt;double, struct YTag>;
-using [.token.string]##Z## = [.token.class-name]##Strong##&lt;double, struct ZTag>;
+using _Y_ = [.token.type]#Strong#<double, struct YTag>;
+using _Z_ = [.token.type]#Strong#<double, struct ZTag>;
 // nest--
 
 // nest++
 struct Point {
-    [.token.string]##X## x;
-    [.token.string]##Y## y;
-    [.token.string]##Z## z;
+    _X_ x;
+    _Y_ y;
+    _Z_ z;
 };
 // nest--
-----
---
-
+```
 
 [.cue]
 ****
@@ -456,16 +445,16 @@ struct Point {
 [.source.hd]
 == !
 
-[source%nested, cpp, subs=quotes,macros]
-----
-using [.token.string]##X## = [.token.class-name]##Strong##&lt;double, struct XTag>;
-using [.token.string]##Y## = [.token.class-name]##Strong##&lt;double, struct YTag>;
-using [.token.string]##Z## = [.token.class-name]##Strong##&lt;double, struct ZTag>;
+[%nested, subs="verbatim,quotes"]
+```cpp
+using _X_ = [.token.type]#Strong#<double, struct XTag>;
+using _Y_ = [.token.type]#Strong#<double, struct YTag>;
+using _Z_ = [.token.type]#Strong#<double, struct ZTag>;
 
 // nest++
-using [.token.class-name]##Point## = std::tuple&lt;[.token.string]##X##, [.token.string]##Y##, [.token.string]##Z##>;
+using [.token.type]#Point# = std::tuple<__X__, _Y_, _Z_>;
 // nest--
-----
+```
 
 
 [.cue]
@@ -479,16 +468,16 @@ A network protocol will use something different to transport the data.
 [.source.hd]
 == !
 
-[source%nested, cpp, subs=quotes,macros]
-----
-using [.token.string]##X## = [.token.class-name]##Strong##&lt;double, struct XTag>;
-using [.token.string]##Y## = [.token.class-name]##Strong##&lt;double, struct YTag>;
-using [.token.string]##Z## = [.token.class-name]##Strong##&lt;double, struct ZTag>;
+[%nested, subs="verbatim,quotes"]
+```cpp
+using _X_ = [.token.type]#Strong#<double, struct XTag>;
+using _Y_ = [.token.type]#Strong#<double, struct YTag>;
+using _Z_ = [.token.type]#Strong#<double, struct ZTag>;
 
 // nest++
-using [.token.class-name]##Point## = [.token.bold]##AllOf##&lt;[.token.string]##X##, [.token.string]##Y##, [.token.string]##Z##>;
+using [.token.type]#Point# = **AllOf**<__X__, _Y_, _Z_>;
 // nest--
-----
+```
 
 [.cue]
 ****
@@ -526,36 +515,33 @@ These are essential part of a distributed system.
 ****
 
 
-[.source]
+[.source.build]
 == !
 
-[.build]
---
-[source%nested, cpp, subs=quotes,macros]
+[source%nested, cpp, subs="verbatim,quotes"]
 ----
-using [.token.class-name]##Point## = [.token.bold]##AllOf##&lt;[.token.string]##X##, [.token.string]##Y##, [.token.string]##Z##>;
+using [.token.type]#Point# = *AllOf*<__X__, _Y_, _Z_>;
 // nest++
-using [.token.class-name]##Points## = [.token.bold]##SequenceOf##&lt;[.token.class-name]##Point##>;
+using [.token.type]#Points# = *SequenceOf*<[{type}]##Point##>;
 // nest--
 
 // nest++
-using [.token.class-name]##Geometry## = [.token.bold]##AllOf##&lt;[.token.class-name]##Points##, [.token.class-name]##Faces##, [.token.class-name]##Shaders##>;
+using [.token.type]#Geometry# = *AllOf*<[.token.type]##Points##, [.token.type]#Faces#, [.token.type]##Shaders##>;
 // nest--
 // nest++
-using [.token.class-name]##Object## = [.token.bold]##OneOf##&lt;[.token.class-name]##Geometry##, [.token.class-name]##Light##, [.token.class-name]##Camera##>;
+using [.token.type]#Object# = *OneOf*<[.token.type]##Geometry##, [.token.type]#Light#, [.token.type]##Camera##>;
 // nest--
 // nest++
-using [.token.class-name]##Scene## = [.token.bold]##Hierarchy##&lt;[.token.string]##ObjectId##, [.token.class-name]##Object##>;
+using [.token.type]#Scene# = *Hierarchy*<__ObjectId__, [.token.type]#Object#>;
 // nest--
 
 // nest++
-using [.token.class-name]##Document## = [.token.bold]##AllOf##&lt;[.token.string]##Name##, [.token.class-name]##Scene##>;
+using [.token.type]#Document# = *AllOf*<__Name__, [.token.type]#Scene#>;
 // nest--
 // nest++
-using [.token.class-name]##Documents## = [.token.bold]##EntitySet##&lt;[.token.string]##DocId##, [.token.class-name]##Document##>;
+using [.token.type]#Documents# = *EntitySet*<__DocId__, [.token.type]#Document#>;
 // nest--
 ----
---
 
 == !
 
@@ -604,34 +590,31 @@ Let's start with the basics.
 How can we express our data schema in C++.
 ****
 
-[.source.hd]
+[.source.hd.build]
 == !
 
-[.build]
---
-[source%nested, cpp, subs=quotes,macros]
-----
+[%nested, subs="verbatim,quotes"]
+```cpp
 // recursive schema primitives:
 // nest++
-template&lt;class...> struct [.token.black.bold]##AllOf## {};
+template<class...> struct [.token.black.bold]#AllOf# {};
 // nest--
 // nest++
-template&lt;class...> struct [.token.black.bold]##OneOf## {};
+template<class...> struct [.token.black.bold]#OneOf# {};
 // nest--
 // nest++
-template&lt;class> struct [.token.black.bold]##SequenceOf## {};
+template<class> struct [.token.black.bold]#SequenceOf# {};
 // nest--
 
 // nest++
-template&lt;class [.token.string]##Id##, class>
-struct [.token.black.bold]##EntitySet## {};
+template<class _Id_, class>
+struct [.token.black.bold]#EntitySet# {};
 // nest--
 // nest++
-template&lt;class [.token.string]##Id##, class>
-struct [.token.black.bold]##Hierarchy## {};
+template<class _Id_, class>
+struct [.token.black.bold]#Hierarchy# {};
 // nest--
-----
---
+```
 
 [.cue]
 ****
@@ -650,81 +633,81 @@ image::grandValleyCattleDrive.jpg[]
 [.source.hd]
 == !
 
-[source, cpp, subs=quotes,macros]
+[subs="verbatim,quotes"]
+```cpp
+
+** **
+
+** **
+
+*AllOf*<...>
+    -> std::tuple<...>;
+```
+
+[.source.hd]
+== !
+
+[%nested, subs="verbatim,quotes"]
+```cpp
+
+** **
+
+** **
+// nest++
+template<class... Ts>
+// nest--
+*AllOf*<Ts...>
+    -> std::tuple<...>;
+```
+
+[.source.hd]
+== !
+
+[source%nested, cpp, subs="verbatim,quotes"]
 ----
-&nbsp;
-&nbsp;
-&nbsp;
-&nbsp;
-&nbsp;
-[.token.bold]##AllOf##&lt;...>
-    -> std::tuple&lt;...>;
+
+** **
+
+** **
+template<class... Ts>
+// nest++
+[.token.type]#StorageFor#(**AllOf**<Ts...>)
+// nest--
+    -> std::tuple<...>;
 ----
 
 [.source.hd]
 == !
 
-[source%nested, cpp, subs=quotes,macros]
+[source%nested, cpp, subs="verbatim,quotes"]
 ----
-&nbsp;
-&nbsp;
-&nbsp;
-&nbsp;
+
+** **
+
+** **
+template<class... Ts>
+[.token.type]#StorageFor#(**AllOf**<Ts...>)
 // nest++
-template&lt;class... Ts>
-// nest--
-[.token.bold]##AllOf##&lt;Ts...>
-    -> std::tuple&lt;...>;
-----
-
-[.source.hd]
-== !
-
-[source%nested, cpp, subs=quotes,macros]
-----
-&nbsp;
-&nbsp;
-&nbsp;
-&nbsp;
-template&lt;class... Ts>
-// nest++
-[.token.class-name]##StorageFor##([.token.bold]##AllOf##&lt;Ts...>)
-// nest--
-    -> std::tuple&lt;...>;
-----
-
-[.source.hd]
-== !
-
-[source%nested, cpp, subs=quotes,macros]
-----
-&nbsp;
-&nbsp;
-&nbsp;
-&nbsp;
-template&lt;class... Ts>
-[.token.class-name]##StorageFor##([.token.bold]##AllOf##&lt;Ts...>)
-// nest++
-    -> std::tuple&lt;[.token.class-name]##StorageFor##&lt;Ts>...>;
+    -> std::tuple<[.token.type]##StorageFor##<Ts>...>;
 // nest--
 ----
 
 [.source.hd]
 == !
 
-[source%nested, cpp, subs=quotes,macros]
+[source%nested, cpp, subs="verbatim,quotes"]
 ----
 // nest++
-template&lt;class [.token.black]##T##>
-using [.token.class-name]##StorageFor## =
-    decltype(storageFor([.token.constant]##adl##, [.token.constant]##ptr##&lt;T>));
+template<class [.token.black]#T#>
+using [.token.type]#StorageFor# =
+    decltype(storageFor([.token.constant]#adl#, [.token.constant]#ptr#<T>));
 // nest--
-&nbsp;
-template&lt;class... Ts>
+
+template<class... Ts>
 // nest++
-auto storageFor([.token.class-name]##ADL##, [.token.bold]##AllOf##&lt;Ts...> *)
+auto storageFor([.token.type]#ADL#, *AllOf*<Ts...> *)
 // nest--
-    -> std::tuple&lt;[.token.class-name]##StorageFor##&lt;Ts>...>;
+    -> std::tuple<[.token.type]##StorageFor##<Ts>...>;
 ----
 
 
@@ -993,12 +976,12 @@ Our functon signature changed accordingly.
 
 ////
 [%build.hd]
-* [language-cpp]#`[.token.class-name]##CommandFor##<T>`#
-* [language-cpp]#`[.token.class-name]##ComamndValidatorFor##<T>`#
-* [language-cpp]#`[.token.class-name]##RepositoryFor##<T>`#
-* [language-cpp]#`[.token.class-name]##EventFor##<T>`#
-* [language-cpp]#`[.token.class-name]##ComputeFor##<T>`#
-* [language-cpp]#`[.token.class-name]##ViewModelFor##<T>`#
+* [language-cpp]#`[.token.type]##CommandFor##<T>`#
+* [language-cpp]#`[.token.type]##ComamndValidatorFor##<T>`#
+* [language-cpp]#`[.token.type]##RepositoryFor##<T>`#
+* [language-cpp]#`[.token.type]##EventFor##<T>`#
+* [language-cpp]#`[.token.type]##ComputeFor##<T>`#
+* [language-cpp]#`[.token.type]##ViewModelFor##<T>`#
 ////
 
 [.subtitle]
@@ -1007,29 +990,31 @@ Our functon signature changed accordingly.
 [.source.hd]
 == !
 
-[source%nested, cpp, subs=quotes,macros]
+[source%nested, cpp, subs="verbatim,quotes"]
 ----
 // nest++
-template&lt;class [.token.black]##T##>
-using [.token.class-name]##ViewModelFor## = decltype(
-        viewModelFor([.token.constant]##adl##, [.token.constant]##ptr##&lt;T>));
+template<class [.token.black]#T#>
+using [.token.type]#ViewModelFor# = decltype(
+        viewModelFor([.token.constant]#adl#, [.token.constant]#ptr#<T>));
 // nest--
 
 // nest++
-template&lt;class... Ts>
-auto viewModelFor([.token.class-name]##ADL##, [.token.bold]##AllOf##&lt;Ts...> *)
-    -> [.token.class-name]##AllOfView##&lt;Ts...>;
+template<class... Ts>
+auto viewModelFor([.token.type]#ADL#, *AllOf*<Ts...> *)
+// nest--
+// nest++
+    -> [.token.type]#AllOfView#<Ts...>;
 // nest--
 ----
 
 [.source.hd]
 == !
 
-[source%nested, cpp, subs=quotes,macros]
-----
+[%nested, subs="verbatim,quotes"]
+```cpp
 nest++
-template&lt;class... Ts>
-class AllOfView : public [.token.class-name]##QObject## {
+template<class... Ts>
+class AllOfView : public [.token.type]#QObject# {
 nest--
 
 
@@ -1038,13 +1023,13 @@ nest--
 
 
 };
-----
+```
 
 == Woboq Verdigris
 
 [%build]
 * Plug in replacement for Qt moc
-* Allows templated `[.token.class-name]##QObject##`
+* Allows templated `[.token.type]##QObject##`
 * link:https://github.com/woboq/verdigris[github.com/woboq/verdigris]
 * PR#69 adds "ConstExpr C++ API"
 
@@ -1061,10 +1046,10 @@ Verdigris from Woboq is a huge win.
 [.source.hd]
 == !
 
-[source%nested, cpp, subs=quotes,macros]
+[source%nested, cpp, subs="verbatim,quotes"]
 ----
-template&lt;class... Ts>
-class AllOfView : public [.token.class-name]##QObject## {
+template<class... Ts>
+class AllOfView : public [.token.type]#QObject# {
   // nest++
   W_OBJECT(AllOfView)
   // nest--
@@ -1072,8 +1057,8 @@ class AllOfView : public [.token.class-name]##QObject## {
 };
 
 // nest++
-W_OBJECT_IMPL([.token.class-name]##AllOfView##&lt;Ts...>,
-              template&lt;class... Ts>)
+W_OBJECT_IMPL([.token.type]#AllOfView#<Ts...>,
+              template<class... Ts>)
 // nest--
 ----
 
@@ -1083,43 +1068,40 @@ W_OBJECT instead of Q_Object macro.
 W_OBJECT_IMPL generates all the code moc would generate.
 ****
 
-[.source.hd.s77x19]
+[.source.build.hd.s77x19]
 == !
 
-[.build]
---
-[source%nested, cpp, subs=quotes,macros]
+[source%nested, cpp, subs="verbatim,quotes"]
 ----
-template&lt;class... Ts>
-class AllOfView : public [.token.class-name]##QObject## {
+template<class... Ts>
+class AllOfView : public [.token.type]#QObject# {
 
   // nest++
-  template&lt;[.token.keyword]##size_t## I,
+  template<[.token.keyword]##size_t## I,
   // nest++
-           class = std::enable_if_t&lt;(I &lt; sizeof...(Ts))>>
+           class = std::enable_if_t<(I < sizeof...(Ts))>>
   // nest--
   struct RegisterProperties {
     // nest++
-    constexpr static auto [.token.constant]##property## = 
+    constexpr static auto [.token.constant]#property# = 
     // nest--
       // nest++
-      w_cpp::[.token.function]##makeProperty##&lt;[.token.class-name]##QVariant##>(
-          [.token.constant]##property_name##&lt;I>, [.token.constant]##qvariant_name##)
+      w_cpp::[.token.function]##makeProperty##<[.token.type]##QVariant##>(
+          [.token.constant]#property_name#<I>, [.token.constant]#qvariant_name#)
         // nest--
         // nest++
-        .setGetter(&[.token.class-name]##AllOfView##::[.token.function]##getPropertyValue##&lt;I>)
-        .setSetter(&[.token.class-name]##AllOfView##::[.token.function]##setPropertyValue##&lt;I>)
-        .setNotify(&[.token.class-name]##AllOfView##::[.token.function]##propertyChanged##&lt;I>);
+        .setGetter(&[.token.type]##AllOfView##::[.token.function]##getPropertyValue##<I>)
+        .setSetter(&[.token.type]##AllOfView##::[.token.function]##setPropertyValue##<I>)
+        .setNotify(&[.token.type]##AllOfView##::[.token.function]##propertyChanged##<I>);
         // nest--
   };
   // nest--
   // nest++
-  W_CPP_PROPERTY([.token.class-name]##RegisterProperties##)
+  W_CPP_PROPERTY([.token.type]#RegisterProperties#)
   // nest--
 
 };
 ----
---
 
 [.cue]
 ****
@@ -1493,46 +1475,44 @@ image::rebuild_logo.png[role="pull-left", width="450"]
 
 == Opaque Strong Types
 
-[.source.hd.s77x19]
+[.source.build.hd]
 == !
 
-[.build]
---
-[source%nested, cpp, subs=quotes,macros]
+[source%nested, cpp, subs="verbatim,quotes"]
 ----
 // nest++
+struct PersonId
 // nest++
-struct PersonId;
+      : [{type}]##Strong##<int, struct PersonIdTag>
 // nest--
-// nest++
-constexpr auto makeOpaque(Strong&lt;int, struct PersonIdTag>)
-    -> PersonId;
-// nest--
-
-struct PersonId : Strong&lt;int, struct PersonIdTag> {
+{
     // nest++
-    using Strong::Strong;
+    using [{type}]##Strong##::[.token.function]##Strong##;
     // nest--
 };
 // nest--
-----
---
 
-[.source.hd.s77x19]
+// nest++
+constexpr auto makeOpaque(
+        [{type}]##Strong##<int, struct PersonIdTag>)
+    -> [{type}]#PersonId#;
+// nest--
+----
+
+[.source.build.hd.s77x19]
 == !
 
-[.build]
---
-[source%nested, cpp]
-----
-#define STRONG_OPAQUE(name, type, ...)                   \
-  struct name;                                           \
-  constexpr auto makeOpaqueType(Strong<                  \
-      type, name##Tag, ##__VA_ARGS__>) -> name;          \
-  struct name : Strong<type, name##Tag, ##__VA_ARGS__> { \
-      using Strong::Strong;                              \
-  }
+:dblhash: ##
+:dblunder: __
 
-STRONG_OPAQUE(PersonId, int);
-----
---
+[subs="verbatim,quotes,attributes"]
+```cpp
+#define [.token.string]##STRONG_OPAQUE##(name, type, ...)                   \
+  struct name : Strong<type, name{dblhash}Tag, {dblhash}{dblunder}VA_ARGS{dblunder}> { \
+    using Strong::Strong;                                \
+  };                                                     \
+  constexpr auto makeOpaqueType(Strong<                  \
+    type, name{dblhash}Tag, {dblhash}{dblunder}VA_ARGS{dblunder}>) -> name             \
+
+[.token.string]##STRONG_OPAQUE##([{type}]##PersonId##, int);
+```
