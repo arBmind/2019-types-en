@@ -1,11 +1,9 @@
-# Type driven Development mit C++
-Vortrag für [ADC++2019](http://www.adcpp.de/2019/) (22.-23. Mai 2019 in Regensburg)
+# Type Driven User Interface with Qt and C++
+Presentation for the [Qt World Summit 2019](https://www.qt.io/qtws19) (4.-6. November 2019 in Berlin)
 
 ## Slides
 
-All slides are in German.
-
-You can view slides at https://arbmind.github.io/2019-types-de
+You can view slides at https://arbmind.github.io/2019-types-en
 
 ## Code
 
