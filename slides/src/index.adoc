@@ -1,4 +1,4 @@
-= Type Driven User Interfaces: with [.yellow]#Q_t# and [.yellow]#C++#
+= Type Driven User Interfaces: with [.yellow]#Qt# &nbsp; and [.yellow]#C++#
 :author: Andreas Reischuck
 :twitter: @arBmind
 :!avatar: andreas.png
@@ -39,11 +39,15 @@ Welcome
 
 Goals of this talk:
 
-* Go play with C++ / hacken?
-* Increase understanding - What is what?
-* Not Important - Use this next week.
+* Ideas and Concepts to inspire your imagination!
+* Not a receipt you can use this next week.
+* learn some practical things on the way.
 
 Hopefully for everybody I have something unknown!
+
+Did you notice the gap between architecture and implementation?
+
+Let's do an example:
 ****
 
 
@@ -52,6 +56,17 @@ Hopefully for everybody I have something unknown!
 [%build]
 * complex!
 * (note: simplified for slides!)
+
+[.cue]
+****
+A distributed system.
+
+* a system with many integral parts
+* usually very hard to test as a whole
+
+I have only 20 minutes to explain, so I prepared a picture.
+… and simplied it to the essentials
+****
 
 == !
 
@@ -195,7 +210,7 @@ Hopefully for everybody I have something unknown!
                 c-1.66,1 -4,.33 -5,-1.33 z"
             transform="rotate(140)" />
         
-        <text class="commandText" x="-50" y="40">Events</text>
+        <text class="commandText" x="-50" y="40">Event</text>
     </g>
 
     <g class="compute build" transform="translate(825, 575)">
@@ -211,7 +226,7 @@ Hopefully for everybody I have something unknown!
                 v-15 l40,-40 l-40,-40 z"
             transform="scale(0.66) translate(0,30)" />
         
-        <text class="ViewText" x="0" y="-50">Computations</text>
+        <text class="ViewText" x="0" y="-50">Computation</text>
     </g>
 
     <g class="updates build" transform="translate(530, 500)">
@@ -229,7 +244,7 @@ Hopefully for everybody I have something unknown!
                 c-1.66,1 -4,.33 -5,-1.33 z"
             transform="scale(-1,1) rotate(0)" />
         
-        <text class="commandText" x="-20" y="0">Updates</text>
+        <text class="commandText" x="-20" y="0">Update</text>
     </g>
 
     <g class="views build" transform="translate(170, 550) scale(1.5)">
@@ -269,11 +284,24 @@ Hopefully for everybody I have something unknown!
                m25,0 v-60 h20 v60 z"
             transform="translate(50,0)" />
         
-        <text class="ViewText" x="0" y="-90">Views</text>
+        <text class="ViewText" x="0" y="-90">View</text>
     </g>
 
 </svg> 
 ++++
+
+[.cue]
+****
+* human interface with a user.
+* creates a command
+* sends it to server
+* after validation, storage we send an event
+* with some magic computation we create one or more updates
+* display probably somewhere else 
+* probably a nice display with QtQuick
+
+Assume we have to build a distributed system like this…
+****
 
 [.section]
 == How can we design this?
@@ -283,6 +311,16 @@ Hopefully for everybody I have something unknown!
 * ensure data compatibility
 * communicate with developers
 
+[.cue]
+****
+* I visualized for you the data flow.
+* How do we ensure every system uses the same data?
+* How do we put this architecture in code?
+
+That's the goal!
+
+\[Pause]
+****
 
 [.subtitle]
 == Strong Types
@@ -290,6 +328,10 @@ Hopefully for everybody I have something unknown!
 [.cue]
 ****
 * Let's begin at the bottom
+
+Who has heard of strong types?
+
+Let me explain by starting with the motivation…
 
 Why strong types?
 ****
@@ -306,6 +348,17 @@ struct Point {
 };
 ```
 
+[.cue]
+****
+What is the issue with this simple struct?
+
+The fields have a logical ordering…
+
+* x, y, z
+
+But sooner than later someone might extend it.
+****
+
 [.source.hd]
 == !
 
@@ -320,6 +373,11 @@ struct Point {
     // nest--
 };
 ```
+
+[.cue]
+****
+… and someone else extends it again …
+****
 
 [.source.hd]
 == !
@@ -337,6 +395,17 @@ struct Point {
     // nest--
 };
 ```
+
+[.cue]
+****
+Now we have 6 doubles and you have to know the order.
+
+What happens if you get the order wrong?
+
+… probably funny things …
+
+Let's try to fix that.
+****
 
 [.source.hd.build]
 == !
@@ -360,6 +429,20 @@ struct Point {
 // nest--
 ```
 
+[.cue]
+****
+Let's create a struct with one field only.
+This successfully avoids any ordering issues.
+
+Repeat this for every field.
+
+Tada: That's basically strong typing.
+
+If you give an X where a Y is expected your compiler errors.
+
+But now type names and field names are redundant.
+****
+
 [.source.hd]
 == !
 
@@ -373,6 +456,16 @@ struct Z { double v{}; };
 using [{type}]#Point# = std::tuple<[{type}]##X##, [.token.type]#Y#, [{type}]#Z#>;
 // nest--
 ```
+
+[.cue]
+****
+Using a tuple would be enough.
+
+But the usage of this Point would be a bit cumbersome.
+
+Besides you probably want more complex strong types.
+Let's create a template…
+****
 
 [.source.build]
 == !
@@ -391,10 +484,15 @@ struct Strong {
 
 [.cue]
 ****
-* The template signature: base type and any amount of tags
+* The template signature: base value type and any amount of tags
 * Inside we store just the value
 
-You might want to add operators, but that's enough for this talk.
+You might want to add operators:
+* explicit constructors
+* explicit conversions
+* maybe some math operators
+
+But that's enough for this talk.
 
 If you want to learn more about strong types…
 ****
@@ -410,8 +508,9 @@ link:https://www.youtube.com/watch?v=fWcnp7Bulc8[Strong Types in C\++ - Barney D
 ****
 There are a lot of good talks and blog posts.
 
-If you want to stick to standard take a look at <chronos>.
+For example Barney Dellar at C++ on Sea this year.
 
+If you want to stick to standard take a look at <chronos>.
 ****
 
 
@@ -437,9 +536,11 @@ struct Point {
 
 [.cue]
 ****
-* So we use our strong type
-* Build the tag type just in place
-* They are just to make each type different
+* So we use our strong type templates
+* Build the struct tag type just in place
+* The tags are never used - just to make each type different
+
+We may also go back to the tuple to avoid rendundancy.
 ****
 
 [.source.hd]
@@ -456,13 +557,15 @@ using [.token.type]#Point# = std::tuple<__X__, _Y_, _Z_>;
 // nest--
 ```
 
-
 [.cue]
 ****
-* Tuple is an implementation that stores all our values
+A Tuple is an implementation that stores all our values
 
 If we design our distributed system, we do not really care about storage details.
+
 A network protocol will use something different to transport the data.
+
+So we want to generalize about the concept.
 ****
 
 [.source.hd]
@@ -481,8 +584,11 @@ using [.token.type]#Point# = **AllOf**<__X__, _Y_, _Z_>;
 
 [.cue]
 ****
-* So we name it AllOf
+* I thought a bit about a good name
+* AllOf seems to express the indend very well
 * We describe that all of the types have to be stored or transmitted.
+
+This idea leads us to Data Schemas.
 ****
 
 
@@ -491,9 +597,9 @@ using [.token.type]#Point# = **AllOf**<__X__, _Y_, _Z_>;
 
 [.cue]
 ****
-Let's call this a data schema.
-
 That's nothing new…
+
+You might have seen it:
 ****
 
 == Existing Data Schemas
@@ -505,22 +611,26 @@ That's nothing new…
 
 [.cue]
 ****
-Schemas are everywhere.
+Schemas are widely used.
 
 They describe how our data is organised
 These are essential part of a distributed system.
 
 * We can derive how to store our data
 * And we can derive how to communicate
+
+Let's try to build a data schema:
 ****
 
 
-[.source.build]
+[.source]
 == !
 
 [source%nested, cpp, subs="verbatim,quotes"]
 ----
+// nest++
 using [.token.type]#Point# = *AllOf*<__X__, _Y_, _Z_>;
+// nest--
 // nest++
 using [.token.type]#Points# = *SequenceOf*<[{type}]##Point##>;
 // nest--
@@ -542,6 +652,20 @@ using [.token.type]#Document# = *AllOf*<__Name__, [.token.type]#Scene#>;
 using [.token.type]#Documents# = *EntitySet*<__DocId__, [.token.type]#Document#>;
 // nest--
 ----
+
+[.cue]
+****
+* You have seen our point
+* A sequence of points might be useful
+* Together with faces and shaders the for geometry
+* Which might be one kind of objects
+* That we store in a scene hierarchy
+* If we add some meta data we get a document with a scene
+* And our application might use multiple documents
+
+That's very dense code.
+Let's make a visualisation out of it…
+****
 
 == !
 
@@ -565,18 +689,14 @@ image::DocumentsSchema/Slide6.png[role="center", width="1920"]
 
 image::DocumentsSchema/Slide7.png[role="center", width="1920"]
 
-
-== !
-
-image::Geburtstag.jpg[role="center", width="1920"]
-
 [.cue]
 ****
-We have now everything to try this with C++ and Qt
+This seems very promising
 
-* Strong Types
-* Distributed System: Commands, Events, Protocols,
-* data schema
+* Thanks to the use of Strong Types and schema
+* Code and architecture are very clean.
+
+Let's go further…
 ****
 
 
@@ -585,9 +705,9 @@ We have now everything to try this with C++ and Qt
 
 [.cue]
 ****
-Let's start with the basics.
+You might ask:
 
-How can we express our data schema in C++.
+How to implement our schema templates?
 ****
 
 [.source.hd.build]
@@ -618,9 +738,8 @@ struct [.token.black.bold]#Hierarchy# {};
 
 [.cue]
 ****
-Notice these are all empty structures.
-
-Our hierarchy is customized to our special needs.
+These are some of the simplest templates you can write.
+They are all empty.
 
 How do we make use of this schema if everything is just empty?
 ****
@@ -629,6 +748,13 @@ How do we make use of this schema if everything is just empty?
 
 [.canvas]
 image::grandValleyCattleDrive.jpg[]
+
+[.cue]
+****
+We basically use our schema to generate most of our code.
+
+Basically…
+****
 
 [.source.hd]
 == !
@@ -643,6 +769,21 @@ image::grandValleyCattleDrive.jpg[]
 *AllOf*<...>
     -> std::tuple<...>;
 ```
+
+[.cue]
+****
+We want to go from a schema concept to something real.
+
+For example a basic storage type.
+
+AllOf should be stored as a std tuple.
+You might want to use something different.
+But the concept is the same.
+
+So let's make this real C++ code.
+
+First this is probably a template…
+****
 
 [.source.hd]
 == !
@@ -660,6 +801,13 @@ template<class... Ts>
     -> std::tuple<...>;
 ```
 
+[.cue]
+****
+We take all the sub concepts of our AllOf concept.
+
+Next, we have to give it a name…
+****
+
 [.source.hd]
 == !
 
@@ -676,6 +824,13 @@ template<class... Ts>
     -> std::tuple<...>;
 ----
 
+[.cue]
+****
+StorageFor seems to be a good name.
+
+The tuple can only store storage types…
+****
+
 [.source.hd]
 == !
 
@@ -691,6 +846,17 @@ template<class... Ts>
     -> std::tuple<[.token.type]##StorageFor##<Ts>...>;
 // nest--
 ----
+
+[.cue]
+****
+So we apply the StorageFor transformantion to all sub concepts recursively.
+
+Now this is still not valid C++.
+But it (by accident) looks like a function signature.
+
+C++ uses decltype to extract the return type of a function.
+Let's use that:
+****
 
 [.source.hd]
 == !
@@ -710,29 +876,31 @@ auto storageFor([.token.type]#ADL#, *AllOf*<Ts...> *)
     -> std::tuple<[.token.type]##StorageFor##<Ts>...>;
 ----
 
-
 [.cue]
 ****
-We introduce a using retrieve the result type of our function.
+So for any schema concept the StorageFor gives us a storage type. That is the result type of the storageFor function with the arguments:
 
-To make this recursion work, we need ADL.
+* adl is an instance of an empty ADL structure.
+* ptr<T> is a nullptr to T.
 
-Normally a templated function only sees what was defined before the function.
+Normally a templated function only sees what was defined before the function. That would not work, because we need the recursion.
 ADL overrides this and adds everything of our namespace anyways.
-
-* adl is a constexpr instance of ADL.
-* ptr<T> is a constexpr nullptr to T.
-
-This ensures the compiler wont instantiate any complex types.
 
 Our functon signature changed accordingly.
 ****
 
-== Let us generate everything!
-
-
 == !
 
+image::Geburtstag.jpg[role="center", width="1920"]
+
+[.cue]
+****
+* eat the cake we created.
+
+Apply this to the distributed system we went to create.
+****
+
+== !
 
 ++++
 <!-- for editing help:
@@ -854,7 +1022,7 @@ Our functon signature changed accordingly.
                 c-1.66,1 -4,.33 -5,-1.33 z"
             transform="rotate(140)" />
         
-        <text class="commandText" x="-50" y="40">Events</text>
+        <text class="commandText" x="-50" y="40">Event</text>
     </g>
 
     <g class="compute" transform="translate(825, 575)">
@@ -870,7 +1038,7 @@ Our functon signature changed accordingly.
                 v-15 l40,-40 l-40,-40 z"
             transform="scale(0.66) translate(0,30)" />
         
-        <text class="ViewText" x="0" y="-50">Computations</text>
+        <text class="ViewText" x="0" y="-50">Computation</text>
     </g>
 
     <g class="updates" transform="translate(530, 500)">
@@ -888,7 +1056,7 @@ Our functon signature changed accordingly.
                 c-1.66,1 -4,.33 -5,-1.33 z"
             transform="scale(-1,1) rotate(0)" />
         
-        <text class="commandText" x="-20" y="0">Updates</text>
+        <text class="commandText" x="-20" y="0">Update</text>
     </g>
 
     <g class="views" transform="translate(170, 550) scale(1.5)">
@@ -928,7 +1096,7 @@ Our functon signature changed accordingly.
                m25,0 v-60 h20 v60 z"
             transform="translate(50,0)" />
         
-        <text class="ViewText" x="0" y="-90">Views</text>
+        <text class="ViewText" x="0" y="-90">View</text>
     </g>
 
     <g class="schema build" transform="translate(700, 360) scale(2)">
@@ -985,7 +1153,17 @@ Our functon signature changed accordingly.
 ////
 
 [.subtitle]
-== ViewModels
+== ViewModel
+
+[.cue]
+****
+The schema has not enough details to generate a good graphical user interface.
+
+But we can generate very good view models.
+Think about objects you want to use as data sources in your QtQuick UI.
+
+Ok, let's create a view model.
+****
 
 [.source.hd]
 == !
@@ -1007,6 +1185,17 @@ auto viewModelFor([.token.type]#ADL#, *AllOf*<Ts...> *)
 // nest--
 ----
 
+[.cue]
+****
+Let's repeat the same pattern from the StorageFor.
+
+Just rename it to ViewModelFor.
+
+* Notice, that we did not apply the recursion.
+
+How do we implement the AllOfView?
+****
+
 [.source.hd]
 == !
 
@@ -1025,6 +1214,16 @@ nest--
 };
 ```
 
+[.cue]
+****
+Oh, something is strange here…
+
+We have a templated class that inherits QObject.
+That's not supported by Qt.
+
+Luckily…
+****
+
 == Woboq Verdigris
 
 [%build]
@@ -1037,11 +1236,16 @@ nest--
 
 [.cue]
 ****
-Moc Compiler would require a lot of work.
+The smart guys at Woboq created Verdigris.
 
-Verdigris from Woboq is a huge win.
+* It is a plug in replacement for Qt moc
+* We use the regular Qt libraries
+* But we can now get templated QObjects
+* All the source is publicly available on Github with a liberal license.
+* But we need a bit more… That's the PR#69.
+
+Ok, let's use Verdigris…
 ****
-
 
 [.source.hd]
 == !
@@ -1064,8 +1268,17 @@ W_OBJECT_IMPL([.token.type]#AllOfView#<Ts...>,
 
 [.cue]
 ****
-W_OBJECT instead of Q_Object macro.
-W_OBJECT_IMPL generates all the code moc would generate.
+* W_OBJECT instead of Q_Object macro.
+* the W_OBJECT_IMPL macro generates all the code moc would generate.
+
+We have a bit more macro arguments, but we get templates.
+A huge win for very little.
+
+So that's regular Verdigris.
+
+Why do we need the PR#69 ?
+
+Let me show you how we generate properties with the PR.
 ****
 
 [.source.build.hd.s77x19]
@@ -1105,6 +1318,8 @@ class AllOfView : public [.token.type]#QObject# {
 
 [.cue]
 ****
+For each template argument TS we need one property.
+
 To Register the properties we create a templated struct with any name.
 We limit I to the amount of properties we have with enable_it_t.
 Only the property compile time constant matters.
@@ -1114,10 +1329,12 @@ Finally we give that struct to Verdigris.
 
 That's the pattern.
 
+For a real implementation, you will have to seperate, recursive sub concepts that generate QObjects again and simple value properties.
+
+So we achieved our goal…
 ****
 
 == !
-
 
 ++++
 <!-- for editing help:
@@ -1239,7 +1456,7 @@ That's the pattern.
                 c-1.66,1 -4,.33 -5,-1.33 z"
             transform="rotate(140)" />
         
-        <text class="commandText" x="-50" y="40">Events</text>
+        <text class="commandText" x="-50" y="40">Event</text>
     </g>
 
     <g class="compute" transform="translate(825, 575)">
@@ -1255,7 +1472,7 @@ That's the pattern.
                 v-15 l40,-40 l-40,-40 z"
             transform="scale(0.66) translate(0,30)" />
         
-        <text class="ViewText" x="0" y="-50">Computations</text>
+        <text class="ViewText" x="0" y="-50">Computation</text>
     </g>
 
     <g class="updates" transform="translate(530, 500)">
@@ -1273,7 +1490,7 @@ That's the pattern.
                 c-1.66,1 -4,.33 -5,-1.33 z"
             transform="scale(-1,1) rotate(0)" />
         
-        <text class="commandText" x="-20" y="0">Updates</text>
+        <text class="commandText" x="-20" y="0">Update</text>
     </g>
 
     <g class="views" transform="translate(170, 550) scale(1.5)">
@@ -1313,7 +1530,7 @@ That's the pattern.
                m25,0 v-60 h20 v60 z"
             transform="translate(50,0)" />
         
-        <text class="ViewText" x="0" y="-90">Views</text>
+        <text class="ViewText" x="0" y="-90">View</text>
     </g>
 
     <g class="schema" transform="translate(700, 360) scale(2)">
@@ -1359,6 +1576,12 @@ That's the pattern.
 </svg> 
 ++++
 
+[.cue]
+****
+Everything is more or less driven by the central schema.
+
+Let's summarize…
+****
 
 == Recap
 
@@ -1371,21 +1594,46 @@ That's the pattern.
 
 &nbsp;
 
+[.cue]
+****
+* We set our goal with a generic distributed system
+* I introduced you to the idea of strong types
+* That has lead us to data schemas
+* You learned how to generate overything from a schema
+* And finally we also build QObject for ViewModels.
+****
 
 == &plus;+ Advantages &plus;+ &nbsp;
 
 [%build]
 * central schema definition
 * tailored to domain
-* split up data and logic
-* very good testability
+* separation of data and logic
+* testability
+
+[.cue]
+****
+* central schema
+** easy to understand
+** everything stays synchronized
+* easily create custom schema concepts for your domain
+* good separation helps with testing
+****
 
 == \-- Disadvantages \--
 
 [%build]
 * uncommon + learning curve
 * C++ requires some boilerplate
-* long type names
+* long type names (workaround)
+
+[.cue]
+****
+When you have light, you also have shadows.
+
+* It was not possible a few years ago
+* So it's new for almost everybody.
+****
 
 == Links
 
@@ -1406,9 +1654,11 @@ image::andreas.png[role="center", width="400"]
 
 [.cue]
 ****
-Schulungen
+Trainings and Consulting
 
-C++ - Qt - Clean Code
+* C++
+* Qt
+* Clean Code
 ****
 
 == !
@@ -1465,8 +1715,8 @@ image::rebuild_logo.png[role="pull-left", width="450"]
 
 == Photo Credits
 
-[.small]
-* link:https://www.flickr.com/photos/purpleseadonkey/4775066884[Explosion] link:https://creativecommons.org/licenses/by/2.0/[(cc-by-license)]
+[.small.hd]
+* link:https://flic.kr/p/opqqrD[Grand Valley cattle drive] link:https://creativecommons.org/licenses/by-sa/2.0[(cc-by-sa-license)]
 
 [.subtitle]
 == Thank you!
