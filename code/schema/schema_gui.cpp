@@ -20,12 +20,10 @@ using Command = CommandFor<Persons>;
 using Repository = RepositoryFor<Persons>;
 constexpr auto processCommand = command_processor_for<Persons>;
 using ViewModel = view_model::ViewModelFor<person::Persons>;
+using PersonDataView = view_model::ViewModelFor<person::PersonData>;
 
-constexpr auto W_ClassNameOverride(w_internal::W_TypeWrap<ViewModel> = {}) {
-    return w_cpp::viewLiteral("ViewModel");
-}
-constexpr auto
-W_ClassNameOverride(w_internal::W_TypeWrap<view_model::ViewModelFor<person::PersonData>> = {}) {
+constexpr auto w_explicitObjectName(ViewModel *) { return w_cpp::viewLiteral("ViewModel"); }
+constexpr auto w_explicitObjectName(PersonDataView *) {
     return w_cpp::viewLiteral("PersonDataView");
 }
 
@@ -37,8 +35,7 @@ int main(int argc, char *argv[]) {
     QQmlApplicationEngine engine{};
 
     qmlRegisterUncreatableType<ViewModel>("SchemaGui", 1, 0, "ViewModel", "restricted");
-    qmlRegisterUncreatableType<view_model::ViewModelFor<person::PersonData>>(
-        "SchemaGui", 1, 0, "PersonDataView", "restricted");
+    qmlRegisterUncreatableType<PersonDataView>("SchemaGui", 1, 0, "PersonDataView", "restricted");
 
     auto repo = Repository{};
     using CreateCmd = EntityCreate<PersonData>;
