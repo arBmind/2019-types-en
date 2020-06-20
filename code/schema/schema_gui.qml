@@ -14,7 +14,7 @@ Window {
         id: listView
         anchors.fill: parent
 
-        model: view_model.model()
+        model: ViewModel.model()
         delegate: Item {
             id: wrapper
             anchors.left: parent.left
@@ -22,8 +22,7 @@ Window {
             height: 40
 
             property var entity: {
-                console.log(view_model.toString(), view_model instanceof ViewModel);
-                var x = view_model.entity(display);
+                var x = ViewModel.entity(display);
                 console.log(x.toString(), x instanceof PersonDataView);
                 return x;
             }
@@ -49,13 +48,13 @@ Window {
         highlight: Rectangle { color: "lightsteelblue"; radius: 3 }
         highlightMoveDuration: 100
         focus: true
-   }
+    }
 
-   function roleText(role) {
+    function roleText(role) {
         switch(role)      {
         case 0: return "Unknown";
         case 1: return "Teacher";
         case 2: return "Student";
         }
-   }
+    }
 }

@@ -22,7 +22,6 @@ constexpr auto processCommand = command_processor_for<Persons>;
 using ViewModel = view_model::ViewModelFor<person::Persons>;
 using PersonDataView = view_model::ViewModelFor<person::PersonData>;
 
-constexpr auto w_explicitObjectName(ViewModel *) { return w_cpp::viewLiteral("ViewModel"); }
 constexpr auto w_explicitObjectName(PersonDataView *) {
     return w_cpp::viewLiteral("PersonDataView");
 }
@@ -33,8 +32,6 @@ int main(int argc, char *argv[]) {
     QGuiApplication app{argc, argv};
 
     QQmlApplicationEngine engine{};
-
-    qmlRegisterUncreatableType<ViewModel>("SchemaGui", 1, 0, "ViewModel", "restricted");
     qmlRegisterUncreatableType<PersonDataView>("SchemaGui", 1, 0, "PersonDataView", "restricted");
 
     auto repo = Repository{};
@@ -44,9 +41,7 @@ int main(int argc, char *argv[]) {
     processCommand(CreateCmd{Name{"Gyro Gearloose"}, Role::Student}, repo);
 
     auto model = ViewModel{repo};
-
-    auto context = engine.rootContext();
-    context->setContextProperty("view_model", &model);
+    qmlRegisterSingletonInstance("SchemaGui", 1, 0, "ViewModel", &model);
 
     engine.load(QStringLiteral("qrc:/schema_gui.qml"));
     return app.exec();
