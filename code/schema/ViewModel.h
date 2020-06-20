@@ -16,6 +16,8 @@
 namespace view_model {
 
 using namespace recursive;
+using strong::is_strong;
+using strong::StrongValueType;
 
 // clang-format off
 constexpr struct ADL {} adl = {};
@@ -29,7 +31,8 @@ auto makeQVariantFrom(const T &value) -> QVariant {
     if constexpr (std::is_enum_v<T>)
         return static_cast<std::underlying_type_t<T>>(value);
     else if constexpr (is_strong<T>) {
-        if constexpr (std::is_same_v<std::string, decltype(value.v)>)
+        using V = StrongValueType<T>;
+        if constexpr (std::is_same_v<std::string, V>)
             return QString::fromStdString(value.v);
         else
             return QVariant::fromValue(value.v);
@@ -42,7 +45,7 @@ auto makeValueFrom(const QVariant &variant) -> T {
         return static_cast<T>(variant.value<V>());
     }
     else if constexpr (is_strong<T>) {
-        using V = decltype(std::declval<T>().v);
+        using V = StrongValueType<T>;
         if constexpr (std::is_same_v<std::string, V>)
             return T{variant.value<QString>().toStdString()};
         else

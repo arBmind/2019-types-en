@@ -1,3 +1,0 @@
-#include "OpaqueHand.h"
-
-// TODO

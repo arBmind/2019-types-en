@@ -1,3 +1,0 @@
-#include "OpaqueMacro.h"
-
-// TODO

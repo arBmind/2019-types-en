@@ -1,3 +1,3 @@
 #include "Strong.h"
 
-// TODO
+// empty

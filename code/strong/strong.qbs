@@ -4,11 +4,11 @@ Project {
     minimumQbsVersion: "1.7.1"
 
     Product {
-        name: "cpp17"
+        name: "cpp2a"
 
         Export {
             Depends { name: "cpp" }
-            cpp.cxxLanguageVersion: "c++17"
+            cpp.cxxLanguageVersion: "c++2a"
             // cpp.cxxFlags: {
             //     if (qbs.toolchain.contains('msvc')) return ["/await", "/permissive-"];
             //     if (qbs.toolchain.contains('clang')) return ["-fcoroutines-ts"];
@@ -24,17 +24,13 @@ Project {
 
     StaticLibrary {
         name: "strong"
-        Depends { name: "cpp17" }
+        Depends { name: "cpp2a" }
         files: [
-            "OpaqueHand.cpp",
-            "OpaqueHand.h",
-            "OpaqueMacro.cpp",
-            "OpaqueMacro.h",
             "Strong.cpp",
             "Strong.h",
         ]
 
-        Export { Depends { name: "cpp17" } }
+        Export { Depends { name: "cpp2a" } }
     }
     Application {
         name: "strong_test"
