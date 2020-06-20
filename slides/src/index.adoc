@@ -11,7 +11,7 @@
 :codedir: code
 :data-uri:
 
-[.worldsummit]#Qt World Summit 2019 Berlin#
+[.worldsummit]#2020 C++ User Group Osnabrück#
 
 ++++
 <svg class="overlay build" viewBox="0 0 1280 720" width="1920" height="1080">
@@ -412,9 +412,11 @@ Let's try to fix that.
 
 :type: .token.class-name
 
-[%nested, subs="verbatim,quotes"]
+[%nested.build, subs="verbatim,quotes"]
 ```cpp
+// inest++
 struct X { double v{}; };
+// nest--
 // nest++
 struct Y { double v{}; };
 struct Z { double v{}; };
@@ -467,19 +469,43 @@ Besides you probably want more complex strong types.
 Let's create a template…
 ****
 
-[.source.build]
+[.source.s77x19.build]
 == !
 
 [%nested, subs="verbatim,quotes"]
 ```cpp
+template<class V> struct Weak {
 // nest++
-template<class V, class /\*Tag*/ >
-// nest--
-struct Strong {
     // nest++
     [.token.type]##V## v{};
     // nest--
+    // nest++
+    constexpr Weak() = default;
+    constexpr explicit Weak(V v) : v(std::move(v)) {}
+    // nest--
+    // nest++
+    bool operator==(const Weak &) const = default;
+    // nest--
+// nest--
 };
+
+// nest++
+#define DEFINE_STRONG(NAME, VALUE)                     \
+    struct NAME : private Weak<VALUE> {                \
+// nest++
+        using Weak::v;                                 \
+        using Weak::Weak;                              \
+// nest--
+// nest++
+        bool operator==(const NAME &) const = default; \
+// nest--
+    };                                                 \
+// nest++
+    constexpr auto isStrong(ADL *, NAME *)->bool {     \
+        return true;                                   \
+    } 
+// nest--
+// nest--
 ```
 
 [.cue]
@@ -519,10 +545,12 @@ If you want to stick to standard take a look at <chronos>.
 
 [%nested, subs="verbatim,quotes"]
 ```cpp
-using _X_ = [.token.type]#Strong#<double, struct XTag>;
 // nest++
-using _Y_ = [.token.type]#Strong#<double, struct YTag>;
-using _Z_ = [.token.type]#Strong#<double, struct ZTag>;
+DEFINE_STRONG(_X_, double);
+// nest--
+// nest++
+DEFINE_STRONG(_Y_, double);
+DEFINE_STRONG(_Z_, double);
 // nest--
 
 // nest++
@@ -548,9 +576,9 @@ We may also go back to the tuple to avoid rendundancy.
 
 [%nested, subs="verbatim,quotes"]
 ```cpp
-using _X_ = [.token.type]#Strong#<double, struct XTag>;
-using _Y_ = [.token.type]#Strong#<double, struct YTag>;
-using _Z_ = [.token.type]#Strong#<double, struct ZTag>;
+DEFINE_STRONG(_X_, double);
+DEFINE_STRONG(_Y_, double);
+DEFINE_STRONG(_Z_, double);
 
 // nest++
 using [.token.type]#Point# = std::tuple<__X__, _Y_, _Z_>;
@@ -573,9 +601,9 @@ So we want to generalize about the concept.
 
 [%nested, subs="verbatim,quotes"]
 ```cpp
-using _X_ = [.token.type]#Strong#<double, struct XTag>;
-using _Y_ = [.token.type]#Strong#<double, struct YTag>;
-using _Z_ = [.token.type]#Strong#<double, struct ZTag>;
+DEFINE_STRONG(_X_, double);
+DEFINE_STRONG(_Y_, double);
+DEFINE_STRONG(_Z_, double);
 
 // nest++
 using [.token.type]#Point# = **AllOf**<__X__, _Y_, _Z_>;
@@ -666,6 +694,7 @@ using [.token.type]#Documents# = *EntitySet*<__DocId__, [.token.type]#Document#>
 That's very dense code.
 Let's make a visualisation out of it…
 ****
+
 
 == !
 
@@ -865,13 +894,14 @@ Let's use that:
 ----
 // nest++
 template<class [.token.black]#T#>
-using [.token.type]#StorageFor# =
-    decltype(storageFor([.token.constant]#adl#, [.token.constant]#ptr#<T>));
+using [.token.type]#StorageFor# = decltype(
+    storageFor([.token.constant]#nullptr_to#<ADL>, 
+               [.token.constant]#nullptr_to#<T>));
 // nest--
 
 template<class... Ts>
 // nest++
-auto storageFor([.token.type]#ADL#, *AllOf*<Ts...> *)
+auto storageFor([.token.type]#ADL*#, *AllOf*<Ts...>*)
 // nest--
     -> std::tuple<[.token.type]##StorageFor##<Ts>...>;
 ----
@@ -881,7 +911,7 @@ auto storageFor([.token.type]#ADL#, *AllOf*<Ts...> *)
 So for any schema concept the StorageFor gives us a storage type. That is the result type of the storageFor function with the arguments:
 
 * adl is an instance of an empty ADL structure.
-* ptr<T> is a nullptr to T.
+* nullptr_to<T> is a nullptr to T.
 
 Normally a templated function only sees what was defined before the function. That would not work, because we need the recursion.
 ADL overrides this and adds everything of our namespace anyways.
@@ -1173,12 +1203,13 @@ Ok, let's create a view model.
 // nest++
 template<class [.token.black]#T#>
 using [.token.type]#ViewModelFor# = decltype(
-        viewModelFor([.token.constant]#adl#, [.token.constant]#ptr#<T>));
+    viewModelFor([.token.constant]#nullptr_to#<ADL>, 
+                 [.token.constant]#nullptr_to#<T>));
 // nest--
 
 // nest++
 template<class... Ts>
-auto viewModelFor([.token.type]#ADL#, *AllOf*<Ts...> *)
+auto viewModelFor([.token.type]#ADL*#, *AllOf*<Ts...>*)
 // nest--
 // nest++
     -> [.token.type]#AllOfView#<Ts...>;
@@ -1625,7 +1656,6 @@ Let's summarize…
 [%build]
 * uncommon + learning curve
 * C++ requires some boilerplate
-* long type names (workaround)
 
 [.cue]
 ****
@@ -1722,47 +1752,3 @@ image::rebuild_logo.png[role="pull-left", width="450"]
 == Thank you!
 
 [language-cpp]#`co_await question_ready()`#
-
-== Opaque Strong Types
-
-[.source.build.hd]
-== !
-
-[source%nested, cpp, subs="verbatim,quotes"]
-----
-// nest++
-struct PersonId
-// nest++
-      : [{type}]##Strong##<int, struct PersonIdTag>
-// nest--
-{
-    // nest++
-    using [{type}]##Strong##::[.token.function]##Strong##;
-    // nest--
-};
-// nest--
-
-// nest++
-constexpr auto makeOpaque(
-        [{type}]##Strong##<int, struct PersonIdTag>)
-    -> [{type}]#PersonId#;
-// nest--
-----
-
-[.source.build.hd.s77x19]
-== !
-
-:dblhash: ##
-:dblunder: __
-
-[subs="verbatim,quotes,attributes"]
-```cpp
-#define [.token.string]##STRONG_OPAQUE##(name, type, ...)                   \
-  struct name : Strong<type, name{dblhash}Tag, {dblhash}{dblunder}VA_ARGS{dblunder}> { \
-    using Strong::Strong;                                \
-  };                                                     \
-  constexpr auto makeOpaqueType(Strong<                  \
-    type, name{dblhash}Tag, {dblhash}{dblunder}VA_ARGS{dblunder}>) -> name             \
-
-[.token.string]##STRONG_OPAQUE##([{type}]##PersonId##, int);
-```
