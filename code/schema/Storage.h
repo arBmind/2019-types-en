@@ -11,21 +11,20 @@ namespace storage {
 
 using namespace recursive;
 
-struct ADL {};
-constexpr auto adl = ADL{};
+struct ADL;
 
 template<class T>
-using StorageFor = decltype(storageFor(adl, ptr<T>));
+using StorageFor = decltype(storageFor(nullptr_to<ADL>, nullptr_to<T>));
 
 // tag::abstracts[]
 template<class... Ts>
-auto storageFor(ADL, AllOf<Ts...> *) -> std::tuple<StorageFor<Ts>...>;
+auto storageFor(ADL *, AllOf<Ts...> *) -> std::tuple<StorageFor<Ts>...>;
 
 template<class... Ts>
-auto storageFor(ADL, OneOf<Ts...> *) -> std::variant<StorageFor<Ts>...>;
+auto storageFor(ADL *, OneOf<Ts...> *) -> std::variant<StorageFor<Ts>...>;
 
 template<class Id, class Entity>
-auto storageFor(ADL, EntitySet<Id, Entity> *) -> std::vector<std::tuple<Id, StorageFor<Entity>>>;
+auto storageFor(ADL *, EntitySet<Id, Entity> *) -> std::vector<std::tuple<Id, StorageFor<Entity>>>;
 // end::abstracts[]
 
 // tag::values[]
@@ -39,7 +38,7 @@ constexpr bool is_value = [] {
 }();
 
 template<class T>
-auto storageFor(ADL, T *) -> std::enable_if_t<is_value<T>, T>;
+auto storageFor(ADL *, T *) -> std::enable_if_t<is_value<T>, T>;
 // end::values[]
 // end::abstracts[]
 

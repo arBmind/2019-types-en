@@ -11,15 +11,14 @@ using storage::is_value;
 using storage::StorageFor;
 
 // tag::boilerplate[]
-struct ADL {};
-constexpr auto adl = ADL{};
+struct ADL;
 
 template<class T>
-constexpr auto command_processor_for = commandProcessorFor(adl, ptr<T>);
+constexpr auto command_processor_for = commandProcessorFor(nullptr_to<ADL>, nullptr_to<T>);
 // end::boilerplate[]
 
 template<class... Ts>
-constexpr auto commandProcessorFor(ADL, AllOf<Ts...> *) {
+constexpr auto commandProcessorFor(ADL *, AllOf<Ts...> *) {
     return [](const CommandFor<AllOf<Ts...>> &cmd, RepositoryFor<AllOf<Ts...>> &repo) {
         return (command_processor_for<Ts>(std::get<CommandFor<Ts>>(cmd),
                                           std::get<RepositoryFor<Ts>>(repo)),
@@ -28,7 +27,7 @@ constexpr auto commandProcessorFor(ADL, AllOf<Ts...> *) {
 }
 
 template<class T, std::enable_if_t<is_value<T>, void *> = nullptr>
-constexpr auto commandProcessorFor(ADL, T *) {
+constexpr auto commandProcessorFor(ADL *, T *) {
     return [](const CommandFor<T> &cmd, RepositoryFor<T> &repo) {
         if (cmd) repo = *cmd;
     };
@@ -46,7 +45,7 @@ auto oneVisit(V &&v, Fs &&... fs) {
 
 // tag::entitySet[]
 template<class Id, class Entity>
-constexpr auto commandProcessorFor(ADL, EntitySet<Id, Entity> *) {
+constexpr auto commandProcessorFor(ADL *, EntitySet<Id, Entity> *) {
     using T = EntitySet<Id, Entity>;
     return [](const CommandFor<T> &cmd, RepositoryFor<T> &repo) {
         oneVisit(

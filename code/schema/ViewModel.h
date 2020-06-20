@@ -20,11 +20,11 @@ using strong::is_strong;
 using strong::StrongValueType;
 
 // clang-format off
-constexpr struct ADL {} adl = {};
+struct ADL;
 // clang-format on
 
 template<class T>
-using ViewModelFor = decltype(viewModelFor(adl, ptr<T>));
+using ViewModelFor = decltype(viewModelFor(nullptr_to<ADL>, nullptr_to<T>));
 
 template<class T>
 auto makeQVariantFrom(const T &value) -> QVariant {
@@ -137,7 +137,7 @@ private:
 W_OBJECT_IMPL(AllOfView<Ts...>, template<class... Ts>)
 
 template<class... Ts>
-auto viewModelFor(ADL, AllOf<Ts...> *) -> AllOfView<Ts...>;
+auto viewModelFor(ADL *, AllOf<Ts...> *) -> AllOfView<Ts...>;
 
 template<class Id, class Entity>
 class EntitySetModel : public QAbstractListModel {
@@ -212,7 +212,7 @@ W_OBJECT_IMPL((EntitySetView<Id,Entity>), template<class Id, class Entity>)
 // clang-format on
 
 template<class Id, class Entity>
-auto viewModelFor(ADL, EntitySet<Id, Entity> *) //
+auto viewModelFor(ADL *, EntitySet<Id, Entity> *) //
     -> EntitySetView<Id, Entity>;
 
 } // namespace view_model

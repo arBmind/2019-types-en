@@ -23,7 +23,7 @@ using Persons = EntitySet<PersonId, PersonData>;
 // tag::introduction[]
 DEFINE_STRONG(Introduction, string);
 
-auto computedValuesFor(PersonData) -> AllOf<Introduction>;
+auto computedValuesFor(PersonData *) -> AllOf<Introduction>;
 // end::introduction[]
 
 } // namespace person

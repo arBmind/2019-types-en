@@ -15,23 +15,22 @@ using namespace recursive;
 using storage::is_value;
 using storage::StorageFor;
 
-struct ADL {};
-constexpr auto adl = ADL{};
+struct ADL;
 
 template<class T>
-using RepositoryFor = decltype(repositoryFor(adl, ptr<T>));
+using RepositoryFor = decltype(repositoryFor(nullptr_to<ADL>, nullptr_to<T>));
 
 template<class... Ts>
-auto repositoryFor(ADL, AllOf<Ts...> *) -> std::tuple<RepositoryFor<Ts>...>;
+auto repositoryFor(ADL *, AllOf<Ts...> *) -> std::tuple<RepositoryFor<Ts>...>;
 
 template<class T>
-auto repositoryFor(ADL, T *) -> std::enable_if_t<is_value<T>, T>;
+auto repositoryFor(ADL *, T *) -> std::enable_if_t<is_value<T>, T>;
 
 namespace simple {
 
 // tag::simpleEntitySet[]
 template<class Id, class Entity>
-auto repositoryFor(ADL, EntitySet<Id, Entity> *) -> std::map<Id, RepositoryFor<Entity>>;
+auto repositoryFor(ADL *, EntitySet<Id, Entity> *) -> std::map<Id, RepositoryFor<Entity>>;
 // end::simpleEntitySet[]
 
 } // namespace simple
@@ -62,7 +61,7 @@ public:
 };
 
 template<class Id, class Entity>
-auto repositoryFor(ADL, EntitySet<Id, Entity> *) //
+auto repositoryFor(ADL *, EntitySet<Id, Entity> *) //
     -> EntitySetRepository<Id, RepositoryFor<Entity>>;
 // end::entityRepository[]
 

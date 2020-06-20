@@ -31,9 +31,6 @@ template<class Id, class N>
 constexpr auto is_recursive<Hierarchy<Id, N>> = true;
 
 template<class T>
-auto computedValuesFor(T) -> AllOf<>; // Fallback
-
-template<class T>
-constexpr T *ptr = nullptr;
+auto computedValuesFor(T *) -> AllOf<>; // Fallback
 
 } // namespace recursive
