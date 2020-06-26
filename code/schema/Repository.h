@@ -24,7 +24,7 @@ template<class... Ts>
 auto repositoryFor(ADL *, AllOf<Ts...> *) -> std::tuple<RepositoryFor<Ts>...>;
 
 template<class T>
-auto repositoryFor(ADL *, T *) -> std::enable_if_t<is_value<T>, T>;
+requires(is_value<T>) auto repositoryFor(ADL *, T *) -> T;
 
 namespace simple {
 

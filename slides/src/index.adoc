@@ -1,4 +1,4 @@
-= Type Driven User Interfaces: with [.yellow]#Qt# &nbsp; and [.yellow]#C++#
+= Type Driven Development: Managing the [.yellow]#Complexity# of Distributed Systems with [.yellow]#C++#
 :author: Andreas Reischuck
 :twitter: @arBmind
 :!avatar: andreas.png
@@ -15,15 +15,6 @@
 
 ++++
 <svg class="overlay build" viewBox="0 0 1280 720" width="1920" height="1080">
-    <g class="qtLogo" transform="translate(228,205) scale(2)"
-        stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-        <path fill="#fff"
-            d="M48,42 L56,34 L56,0.2 L8,0.2 L0.2,8 L0.2,42 Z" />
-        <path fill="#41CD52"
-            d="M20.9078947,10.7234043 C18.7032164,10.7234043 17.1827485,11.4716796 16.3464912,12.9879217 C15.5292398,14.5041638 15.1111111,16.9065214 15.1111111,20.2343774 C15.1111111,23.542542 15.5102339,25.9252082 16.3084795,27.342993 C17.1067251,28.7607778 18.6461988,29.4893617 20.9078947,29.4893617 C23.1695906,29.4893617 24.6900585,28.7804693 25.4883041,27.3823759 C26.2675439,25.9842826 26.6666667,23.6016164 26.6666667,20.2737604 C26.6666667,16.9262129 26.2675439,14.5041638 25.4502924,12.9879217 C24.6330409,11.4716796 23.1125731,10.7234043 20.9078947,10.7234043" />
-        <path fill="#41CD52"
-            d="M40.8000381,32.4774968 C38.8000381,32.4774968 37.4286095,32.0129806 36.6855619,31.0839484 C35.9428952,30.1549161 35.5619429,28.3934323 35.5619429,25.8000774 L35.5619429,17.4387871 L32.857181,17.4387871 L32.857181,14.1097548 L35.5619429,14.1097548 L35.5619429,8.88394839 L39.3905143,8.88394839 L39.3905143,14.1097548 L44.2667048,14.1097548 L44.2667048,17.4579484 L39.3905143,17.4579484 L39.3905143,25.374271 C39.3905143,26.8450452 39.5048,27.8127871 39.7143238,28.2774968 C39.9236571,28.7613677 40.4762286,28.9936258 41.3333714,28.9936258 L44.2286095,28.8773032 L44.3998476,32.0129806 C42.8381333,32.3224645 41.6379429,32.4774968 40.8000381,32.4774968 L40.8000381,32.4774968 Z M29.7714667,36.2321419 L26.1333714,37.9549161 L22.9905143,32.7095613 C22.5333714,32.8450452 21.8286095,32.9226581 20.8381333,32.9226581 C17.1619429,32.9226581 14.5905143,31.9162065 13.1428952,29.9031097 C11.6952762,27.8904 10.9714667,24.6968516 10.9714667,20.3611742 C10.9714667,16.0063355 11.7143238,12.774271 13.1809905,10.6645935 C14.6476571,8.55472258 17.2000381,7.49020645 20.8381333,7.49020645 C24.4762286,7.49020645 27.0286095,8.53556129 28.4762286,10.6452387 C29.9428952,12.7355613 30.6667048,15.9678194 30.6667048,20.3420129 C30.6667048,23.2256903 30.3619429,25.548271 29.7714667,27.3097548 C29.1617524,29.0904 28.1905143,30.4452387 26.8190857,31.374271 L29.7714667,36.2321419 Z M50.5143238,0.174270968 L48.5714667,0.174270968 L7.75241905,0.174270968 L3.80952383e-05,8.05169032 L3.80952383e-05,34.3934323 L3.80952383e-05,36.5420129 L3.80952383e-05,41.9998839 L5.37146667,41.9998839 L7.31432381,41.9998839 L48.1333714,41.9998839 L55.8857524,34.1226581 L55.8857524,7.78052903 L55.8857524,5.63233548 L55.8857524,0.174270968 L50.5143238,0.174270968 Z" />
-    </g>
     <g class="hnhlogo" transform="translate(10 550) scale(2)" fill="#fff">
         <path
             d="M79.685,34.532c-0.089-1.892-0.292-6.161-0.325-6.321c-0.042-0.205-1.77,0.488-4.821,0.488s-4.779-0.693-4.821-0.488 c-0.034,0.16-0.236,4.43-0.325,6.321h-1.914c-0.089-1.892-0.292-6.161-0.325-6.321c-0.042-0.205-1.77,0.488-4.821,0.488 c-3.051,0-4.779-0.693-4.821-0.488c-0.034,0.16-0.236,4.43-0.325,6.321h-2.036c-0.071-1.465-0.146-2.236-0.184-2.53 c0.398,0.018,0.708,0.1,0.894,0.286c-0.125-3.061-5.282-1.542-5.824-1.814c-2.105-1.062-7.326-4.446-7.3-4.964 c0.025-0.519,3.891-5.347,3.891-5.347s5.273,5.521,5.868,5.55c0.595,0.029,10.304-3.535,9.11-0.417 c1.983-1.796,1.3-2.54,3.311-2.44c2.012,0.1,3.534-0.019,5.034,1.481c-0.276-2.359-3.314-2.723-5.488-2.831 c-2.174-0.108-10.564,2.398-11.272,2.516c-0.924,0.152-3.88-4.011-4.488-4.683c13.837,1.831,17.964-9.801,27.701-3.354 c4.177,2.766,9.031,2.019,14.046,9.322c-5.743-10.568-1.846-8.978-4.994-12.456c-2.51-2.772-10.083-2.087-15.497-6.585 C61.026-1.155,45.045-5.689,4.271,14.68c27.78-11.208,40.532,4.081,40.532,4.081s-4.413,6.747-4.434,7.174 C40.349,26.361,47,30.559,47,30.559s-2.461,0.233-2.285,2.011c0.167-0.167,0.352-0.279,0.548-0.357 c-0.041,0.389-0.102,1.121-0.16,2.32h-2.036c-0.089-1.892-0.292-6.161-0.325-6.321c-0.042-0.205-1.77,0.488-4.821,0.488 s-4.779-0.693-4.821-0.488c-0.034,0.16-0.236,4.43-0.325,6.321h-2.28c-0.088-1.892-0.292-6.161-0.325-6.321 c-0.042-0.205-1.769,0.488-4.821,0.488s-4.779-0.693-4.821-0.488c-0.034,0.16-0.236,4.43-0.325,6.321H0v4.822h100v-4.822H79.685z" />
@@ -795,6 +786,7 @@ Basically…
 
 ** **
 
+** **
 *AllOf*<...>
     -> std::tuple<...>;
 ```
@@ -823,6 +815,7 @@ First this is probably a template…
 ** **
 
 ** **
+
 // nest++
 template<class... Ts>
 // nest--
@@ -846,6 +839,7 @@ Next, we have to give it a name…
 ** **
 
 ** **
+
 template<class... Ts>
 // nest++
 [.token.type]#StorageFor#(**AllOf**<Ts...>)
@@ -869,6 +863,7 @@ The tuple can only store storage types…
 ** **
 
 ** **
+
 template<class... Ts>
 [.token.type]#StorageFor#(**AllOf**<Ts...>)
 // nest++
@@ -895,13 +890,12 @@ Let's use that:
 // nest++
 template<class [.token.black]#T#>
 using [.token.type]#StorageFor# = decltype(
-    storageFor([.token.constant]#nullptr_to#<ADL>, 
-               [.token.constant]#nullptr_to#<T>));
+    storageFor([.token.constant]#nullptr_to#<T>));
 // nest--
 
 template<class... Ts>
 // nest++
-auto storageFor([.token.type]#ADL*#, *AllOf*<Ts...>*)
+auto storageFor(*AllOf*<Ts...>*)
 // nest--
     -> std::tuple<[.token.type]##StorageFor##<Ts>...>;
 ----
@@ -910,13 +904,76 @@ auto storageFor([.token.type]#ADL*#, *AllOf*<Ts...>*)
 ****
 So for any schema concept the StorageFor gives us a storage type. That is the result type of the storageFor function with the arguments:
 
-* adl is an instance of an empty ADL structure.
 * nullptr_to<T> is a nullptr to T.
 
+Our functon signature changed accordingly.
+
+Can anyone spot the potential problem?
+****
+
+[.source.hd]
+== !
+
+[source%nested, cpp, subs="verbatim,quotes"]
+----
+template<class [.token.black]#T#>
+using [.token.type]#StorageFor# = decltype(
+// nest++
+    storageFor([.token.constant]#nullptr_to#<[.token.type]##ADL##>, 
+// nest--
+               [.token.constant]#nullptr_to#<T>));
+
+template<class... Ts>
+auto storageFor([.token.type]#ADL*#, *AllOf*<Ts...>*)
+    -> std::tuple<[.token.type]##StorageFor##<Ts>...>;
+----
+
+[.cue]
+****
 Normally a templated function only sees what was defined before the function. That would not work, because we need the recursion.
 ADL overrides this and adds everything of our namespace anyways.
 
+* adl is an instance of an ADL structure in our namespace.
+
 Our functon signature changed accordingly.
+****
+
+[.source.s77x19.hd.build]
+== !
+
+[%nested, subs="verbatim,quotes"]
+```cpp
+// nest++
+template<class... Ts>
+auto storageFor([.token.type]#ADL*#, *AllOf*<Ts...>*)
+    -> std::tuple<[.token.type]##StorageFor##<Ts>...>;
+// nest--
+
+// nest++
+template<class... Ts>
+auto storageFor([.token.type]#ADL*#, *OneOf*<Ts...>*)
+    -> std::variant<[.token.type]##StorageFor##<Ts>...>;
+// nest--
+
+// nest++
+template<class T>
+auto storageFor([.token.type]#ADL*#, *SequenceOf*<T>*)
+    -> std::vector<[.token.type]##StorageFor##<T>>;
+// nest--
+
+// nest++
+template<class _Id_, class T>
+auto storageFor([.token.type]#ADL*#, *EntitySet*<[.]##_Id_##, T>*)
+    -> std::vector<std::tuple<[.]##_Id_##, [.token.type]##StorageFor##<T>>>;
+// nest--
+```
+
+[.cue]
+****
+These are some of the simplest templates you can write.
+They are all empty.
+
+How do we make use of this schema if everything is just empty?
 ****
 
 == !
@@ -929,6 +986,97 @@ image::Geburtstag.jpg[role="center", width="1920"]
 
 Apply this to the distributed system we went to create.
 ****
+
+
+[.source.s77x19.hd]
+== !
+
+[%nested, subs="verbatim,quotes"]
+```cpp
+// nest++
+template<class... Ts>
+auto storageFor([.token.type]#ADL*#, *AllOf*<Ts...>*)
+    -> std::tuple<[.token.type]##StorageFor##<Ts>...>;
+// nest--
+
+// nest++
+template<class... Ts>
+auto commandFor([.token.type]#ADL*#, *AllOf*<Ts...>*)
+    -> std::tuple<[.token.type]##CommandFor##<Ts>...>;
+// nest--
+
+// nest++
+template<class... Ts>
+auto repositoryFor([.token.type]#ADL*#, *AllOf*<Ts...>*)
+    -> std::tuple<[.token.type]##RepositoryFor##<Ts>...>;
+// nest--
+
+// nest++
+template<class... Ts>
+auto eventFor([.token.type]#ADL*#, *AllOf*<Ts...>*)
+    -> std::tuple<[.token.type]##EventFor##<Ts>...>;
+// nest--
+```
+
+[.source.s77x19.hd.build]
+== !
+
+[%nested.build, subs="verbatim,quotes"]
+```cpp
+// CommandFor<EntitySet<Id, Entity>>
+// nest++
+template<class Entity>
+using [.token.type]##EntityCreate## = [.token.type]##StorageFor##<Entity>;
+// nest--
+// nest++
+template<class _Id_>
+using [.token.type]##EntityDestroy## = _Id_;
+// nest--
+// nest++
+template<class _Id_, class Entity>
+using [.token.type]##EntityUpdate## = std::tuple<__Id__, [.token.type]##CommandFor##<Entity>>;
+// nest--
+
+// nest++
+template<class _Id_, class Entity>
+auto commandFor([.token.type]#ADL*#, *EntitySet*<__Id__, Entity>*)
+    -> std::variant<
+            [.token.type]##EntityCreate##<Entity>,
+            [.token.type]##EntityDestroy##<__Id__>,
+            [.token.type]##EntityUpdate##<__Id__, Entity>>;
+// nest--
+```
+
+[.source.s77x19.hd]
+== !
+
+[%nested, subs="verbatim,quotes"]
+```cpp
+// nest++
+template<class T>
+constexpr auto [.token.constant]#command_processor_for# =
+    commandProcessorFor([.token.constant]#nullptr_to#<[.token.type]##ADL##>, [.token.constant]#nullptr_to#<T>);
+// nest--
+
+// nest++
+template<class... Ts>
+constexpr auto commandProcessorFor([.token.type]#ADL*#, *AllOf*<Ts...>*) {
+// nest++
+    using T = *AllOf*<Ts...>;
+    return [](const [.token.type]##CommandFor##<T>& cmd,
+              [.token.type]##RepositoryFor##<T>& repo) {
+        // nest++
+        return (
+            [.token.constant]#command_processor_for#<Ts>(
+                std::[.token.function]##get##<[.token.type]##CommandFor##<Ts>>(cmd),
+                std::[.token.function]##get##<[.token.type]##RepositoryFor##<Ts>>(repo)),
+            ...);
+        // nest--
+    };
+// nest--
+}
+// nest--
+```
 
 == !
 
@@ -1235,6 +1383,7 @@ How do we implement the AllOfView?
 nest++
 template<class... Ts>
 class AllOfView : public [.token.type]#QObject# {
+    [.token.function]#Q_OBJECT#
 nest--
 
 
